@@ -1,0 +1,17 @@
+---
+description: Standard steps that every implementation plan must include.
+globs: "**/*.plan.md"
+alwaysApply: true
+---
+
+Every implementation plan must include these steps in this order. Add them as both plan sections and frontmatter todos.
+
+### Beginning of every plan
+
+- **Branch setup**: Create fresh feature branches from the repository's default branch in every submodule that will be changed. Branch naming convention: `username/TICKET-ID-short-description` (e.g., `alice/ENG-1234-add-retry-logic`).
+
+### End of every plan (after all implementation steps)
+
+- **CI lint and test**: Run the `ci-lint-test` skill for each changed submodule. Fix failures and re-run until clean.
+- **Pre-MR checklist**: Run the `pre-mr-checklist` skill on each changed submodule. Fix all blockers.
+- **Commit and create MRs**: Commit, push, and create GitLab MRs for each changed submodule. Title must include the ticket ID (`TICKET-ID: Short description`). Assign self, add reviewer. MR descriptions must follow the merge-requests rule.

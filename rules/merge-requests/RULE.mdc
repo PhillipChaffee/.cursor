@@ -1,0 +1,95 @@
+---
+description: "Merge request conventions: titles, descriptions, and when to ask for clarification."
+alwaysApply: true
+---
+
+- **Title must include the ticket identifier** formatted as `TICKET-ID: Short description`.
+  - If no ticket was provided, ask the user for it before creating the MR.
+  - Never drop an existing ticket reference when updating a title.
+
+```
+# ✅ Good
+ENG-1234: Add retry logic for webhook delivery
+
+# ❌ Bad — missing ticket
+Add retry logic for webhook delivery
+```
+
+- **Description must have `## Problem`, `## Fix` (with `### Changes`), `## Impact`, and `## Test Plan` sections.**
+  - `## Problem` describes the problem with concrete symptoms and real-world impact. Be specific — name the services, environments, and failure modes affected.
+  - `## Fix` explains the solution approach at a high level, then lists specific changes under a `### Changes` sub-heading. Each bullet should have a **bold scope label** (file, module, or environment) followed by a description of the change in that scope.
+  - `## Impact` states the consequences of the change — what improves, what trade-offs exist, and any residual risks.
+  - `## Test Plan` lists concrete verification steps (lint, type checks, tests, manual verification, deploy checks).
+  - If you don't have enough context to write any section, ask the user to explain before writing the description.
+
+```markdown
+# ✅ Good
+## Problem
+
+The outbound call endpoint (`/api/v1/calls/outbound`) has no rate limiting.
+A misconfigured automation fired 400 calls in under a minute, which saturated
+the downstream provider's pool and degraded quality for other tenants.
+
+## Fix
+
+Add a per-tenant sliding-window rate limiter backed by Redis, returning 429
+with a `Retry-After` header when the limit is exceeded. Default 10 calls/min,
+configurable per tenant.
+
+### Changes
+
+- **`calls/services.py`**: Add `enforce_outbound_rate_limit(tenant_id)` using
+  the existing Redis sliding-window counter; raise `RateLimitExceeded` on
+  breach.
+- **`calls/views.py`**: Call the limiter at the top of `OutboundCallView.post`;
+  map `RateLimitExceeded` to a 429 response with `Retry-After`.
+- **`calls/models.py`**: Add `outbound_rate_limit_per_min` field to `Tenant`
+  (nullable, defaults to 10 via settings).
+- **migration**: Add the nullable column; backfill is not required.
+
+## Impact
+
+- Outbound calls respect the per-tenant limit (default 10/min).
+- Calls over the limit get 429 + `Retry-After`; in-progress calls are
+  unaffected.
+- Limit is configurable per tenant via admin.
+- Slightly more Redis traffic (one `INCR`/`EXPIRE` per call).
+
+## Test Plan
+
+- [ ] `pytest calls/tests/test_rate_limit.py` — under/over-limit and
+  per-tenant override cases pass
+- [ ] `ruff check .` and `mypy .` clean
+- [ ] Manual: hit the endpoint 11× as one tenant → 11th returns 429 with
+  `Retry-After`; second tenant is unaffected
+- [ ] Verify the nullable column migration applies cleanly on staging
+
+# ❌ Bad — vague problem, no changes list, no impact
+## Problem
+
+Calls keep failing.
+
+## Fix
+
+Added rate limiting to the outbound endpoint.
+
+## Impact
+
+Should fix the issue.
+```
+
+- **Include a test plan** listing what was verified (lint, type checks, tests, manual verification).
+
+## Self-Improvement
+
+After writing an MR description, reflect on whether this rule should be updated:
+
+- **Missing conventions**: Did the MR require structure or sections not covered here (e.g., migration notes, deployment order, rollback plan)?
+- **Unclear guidance**: Was the Why/What distinction hard to apply for this type of change?
+- **New patterns**: Did you write a description format that worked well and should be captured as an example?
+
+If you identified improvements, ask the user:
+
+> "I noticed [specific observation] while writing this MR description. Would you like me to update the merge-requests rule to cover this?"
+
+Do NOT apply changes automatically — let the user review and decide.

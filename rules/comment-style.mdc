@@ -1,0 +1,45 @@
+---
+description: "Comment and docstring style: why-focused, present-tense, no caller references. Apply whenever writing or editing comments, docstrings, or technical prose."
+alwaysApply: true
+---
+
+# Comment & Docstring Style
+
+A comment or docstring must add context the code cannot convey. If it restates the code, delete it.
+
+## Content
+
+- **Why, not what.** Explain the goal, trade-off, or constraint — never narrate the next line.
+
+```python
+# ❌ Narration / goal labels with no why
+# Call the tool
+# Try to recover the real tool result.
+
+# ✅ The constraint the code can't convey
+# The shielded task may have completed before the cancellation arrived; prefer
+# its real result over the INTERRUPTED placeholder.
+```
+
+- **Present state only.** Never describe what the code used to do — no "moved", "was", "previously", "renamed from". Docs describe the code as it exists now.
+
+```python
+# ❌ """Coaching helpers (was part of utils.py before the split)."""
+# ✅ """Coaching output formatting helpers."""
+```
+
+- **No roadmap.** No "for now", "interim", "will be", "until X lands". Future work lives in a plan or ticket, not the code.
+
+- **No caller references in shared or leaf code.** Never "the caller" or enumerations of call sites; describe what an input *means*, not who supplies it. Carve-out: orchestrator code may name the modules it coordinates when explaining cross-module dataflow.
+
+```python
+# ❌ messages: In-turn callers pass turn.messages; the first-message render passes [].
+# ✅ messages: The turn's Anthropic-format message list, flattened into the transcript view.
+```
+
+- **Don't over-narrow.** Describe the contract, not one usage pattern — a function taking `text` operates on "`text`", not "a streamed word".
+
+## Form
+
+- **Never create a lone `Args:`/`Returns:` section** just to document one newly added parameter in a docstring that had none — extend an existing section, fold the meaning into prose, or let the signature speak.
+- **Match the host docstring's density.** Extensions follow the established style and length of the docstring being edited — no multi-paragraph grafts onto one-sentence docstrings.

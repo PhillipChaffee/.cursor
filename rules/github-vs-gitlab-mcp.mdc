@@ -1,0 +1,13 @@
+---
+description: Route PR/MR/issue work to the correct MCP based on the git remote
+alwaysApply: true
+---
+
+# Choosing GitHub vs GitLab MCP
+
+Before using the GitHub or GitLab MCP for PRs, MRs, issues, reviews, or repo metadata, run `git remote -v` to identify the host, then route accordingly:
+
+- **GitHub remote** (e.g. `github.com`) → use the GitHub MCP. Use `gh` CLI as the fallback.
+- **GitLab remote** (e.g. `gitlab.com` or any self-hosted GitLab host) → use the GitLab MCP. Use `glab` CLI as the fallback.
+
+If the remote is missing, ambiguous, or the repo is mirrored to both, ask which platform to target instead of guessing.

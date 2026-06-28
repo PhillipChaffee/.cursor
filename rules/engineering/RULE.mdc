@@ -1,0 +1,42 @@
+---
+description: "Engineering guidelines: scope management, architecture, deploy safety, and rollout."
+alwaysApply: true
+---
+
+- **Scope and simplicity**
+  - Question every addition. Prefer reusing existing abstractions (serializers, utilities, Django builtins) over creating new ones.
+  - Keep MRs focused. If something is nice-to-have but not required for the current ticket, skip it.
+  - Don't build ahead of demand. If a feature isn't needed yet, don't add it.
+
+- **Architecture and code placement**
+  - Views must be thin — only transform input and delegate to a service or task. Business logic does not belong in views, admin actions, or serializers.
+
+  ```python
+  # Bad: logic in the view
+  class LeadCreateView(APIView):
+      def post(self, request):
+          # ... 50 lines of processing, validation, side effects ...
+
+  # Good: view delegates to service
+  class LeadCreateView(APIView):
+      def post(self, request):
+          data = LeadCreateSerializer(data=request.data)
+          data.is_valid(raise_exception=True)
+          lead_services.create_lead(data.validated_data)
+  ```
+
+  - Heavy or risky work goes in background tasks. Anything that calls external APIs, processes large datasets, or could block a request should be a Celery task.
+  - Shared models belong in the shared package. If more than one service uses the same model, enum, or validation logic, it should live in `shared/`.
+  - Prefer standalone utility functions over `@staticmethod` — they are easier to test and reuse.
+
+- **Migration and deploy safety**
+  - Safe column removal pattern: (1) add the new column, (2) migrate all code to use it, (3) defer the old column from the default manager, (4) delete the old column in a follow-up MR. Never drop a column in the same MR that stops using it.
+  - Flag risky migrations or schema changes on hot tables as needing an after-hours deploy.
+  - Flag changes that affect agent config, call flow, or scheduling as needing production verification on a non-live agent.
+
+- **Commits**
+  - Never amend commits or force-push. Create new commits instead — amended history breaks other developers' local branches and CI traceability.
+
+- **Feature flags and rollout**
+  - Gate risky changes behind feature flags. Use Statsig (or equivalent) to control rollout. Include `companyId` in the user context so changes can be enabled for a single company first.
+  - When adding behavioral changes, surface the need for a feature flag and incremental rollout (one company first, then expand gradually).

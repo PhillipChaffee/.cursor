@@ -1,0 +1,53 @@
+---
+description: Delegate research, understanding, and codebase exploration to researcher subagents
+alwaysApply: true
+---
+
+# Delegate Research to Subagents
+
+Keep the main chat context for orchestration, decisions, and edits. Delegate
+research-heavy work to subagents by default.
+
+## When to Delegate
+
+Use researcher subagents for:
+
+- Understanding unfamiliar code, architecture, data flow, call chains, or behavior.
+- Finding definitions, call sites, config, API contracts, related tests, or ownership across
+  more than one obvious file.
+- Debugging/root-cause investigations, code reviews, tradeoff analysis, and plan/design review.
+- Web, documentation, MCP, Linear/GitLab/GitHub, Sentry, Grafana, or other external research.
+
+Do the work inline only when it is truly trivial: a file/path the user explicitly pointed at, a
+single quick symbol lookup, a known fact, or a narrow check needed while actively editing.
+The main agent still owns synthesis, user communication, decisions, and file edits.
+
+## Pick the Researcher Tier
+
+- **`researcher-lite`** (`composer-2.5-fast`): mechanical lookup, simple reads, locating
+  definitions/call sites, extracting config values, confirming one fact.
+- **`researcher-mid`** (`gpt-5.5-extra-high`): moderate reasoning, tracing one flow,
+  summarizing a subsystem, gathering from several sources.
+- **`researcher-deep`** (`claude-opus-4-8-thinking-max`): architecture/tradeoffs,
+  security/performance reasoning, ambiguous or novel questions, conflicting sources.
+- **`deep-research` pipeline**: broad, ambiguous, multi-threaded, or high-stakes work that
+  needs planning, multiple researchers, and synthesis.
+
+When unsure between two tiers, choose the lower tier unless the cost of a shallow answer is high.
+
+## Parallel and Sequential Research
+
+Launch independent subtasks in parallel with multiple subagent calls in one message.
+Run subtasks sequentially only when one genuinely needs another's output; include the prior
+researcher's findings in the next subagent's self-contained prompt.
+
+## Dispatch Requirements
+
+- Make every subagent prompt self-contained: restate the goal, relevant context, sources to use,
+  and exact output format.
+- Do not pass `readonly: true` to researcher subagents that need web or MCP access; their prompt
+  should forbid edits and state-changing commands.
+- If a named researcher subagent is unavailable, use `generalPurpose` with the agent file body
+  from `~/.cursor/agents/<name>.md` inlined and the matching model.
+- Never paste raw subagent output as the final answer. Curate, deduplicate, resolve conflicts,
+  preserve citations, and surface gaps.
