@@ -65,6 +65,33 @@ Copy whichever pieces you want into your own `~/.cursor/`:
 Cursor picks up user-level skills, agents, and rules from `~/.cursor/` on the
 next session. No install script — just copy what looks useful.
 
+## How I use it (the workflow this is built for)
+
+I run a **fast, pretty-smart model as my main-window agent** — the one I'm
+iterating in all day — instead of the slowest, most expensive model. The
+expensive model would do fine in the main window, but it's slower and costs
+more, and for most turn-by-turn work the fast one is enough.
+
+What makes that viable is **delegating the heavy thinking to subagents** so it
+happens in isolated context windows rather than the main one:
+
+- **Research and code review get kicked off as subagents as I go.** The main
+  agent stays cheap and responsive while a `researcher-*` or `cr-*` agent spins
+  up in its own context to do the in-depth investigation or review, then returns
+  just the synthesis. This is what `delegate-research-to-subagents` codifies.
+- **When something genuinely needs the smartest agent and real deep thinking**
+  (architecture calls, ambiguous investigations, deep research), I dispatch it
+  specifically to a slower, smarter subagent — e.g. `researcher-deep` or the
+  top-tier plan-review agents. I get the heavy model's reasoning where it
+  matters without paying for it on every turn.
+
+The second reason I do this, beyond cost and speed, is **keeping the main
+context window clean.** Because the deep work happens in subagent contexts and
+only the distilled result comes back, the main window doesn't fill up with
+transcripts, large reads, or intermediate reasoning. That lets me keep going in
+one agent for a long time without ever having to summarize context to keep
+working.
+
 ## Notes
 
 - `mr-review` can optionally load a review-voice rule (e.g.
