@@ -26,7 +26,7 @@ The main agent still owns synthesis, user communication, decisions, and file edi
 
 - **`researcher-lite`** (`composer-2.5-fast`): mechanical lookup, simple reads, locating
   definitions/call sites, extracting config values, confirming one fact.
-- **`researcher-mid`** (`gpt-5.5-extra-high`): moderate reasoning, tracing one flow,
+- **`researcher-mid`** (`glm-5.2-max`): moderate reasoning, tracing one flow,
   summarizing a subsystem, gathering from several sources.
 - **`researcher-deep`** (`claude-opus-4-8-thinking-max`): architecture/tradeoffs,
   security/performance reasoning, ambiguous or novel questions, conflicting sources.

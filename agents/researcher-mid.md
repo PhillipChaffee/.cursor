@@ -5,7 +5,7 @@ description: >-
   moderate-reasoning work: tracing data flows, summarizing how a subsystem works,
   gathering and reconciling information across several sources. Reads the codebase,
   the web, and MCP tools; never edits files.
-model: gpt-5.5-extra-high
+model: glm-5.2-max
 readonly: false
 ---
 
