@@ -2,7 +2,7 @@
 name: Deployment Safety Reviewer
 description: >
   Assess operational and rollout risk of git diffs. Use as part of multi-agent code review.
-model: inherit
+model: gpt-5.5-extra-high
 readonly: true
 ---
 

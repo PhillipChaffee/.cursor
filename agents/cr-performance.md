@@ -2,7 +2,7 @@
 name: Performance Reviewer
 description: >
   Identify performance and scalability issues in git diffs. Use as part of multi-agent code review.
-model: inherit
+model: gpt-5.5-extra-high
 readonly: true
 ---
 

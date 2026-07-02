@@ -1,7 +1,7 @@
 ---
 name: Plan Review Verifier
 description: Use as part of multi-agent plan review. Filters reviewer findings before any walkthrough or fix runs by re-examining each finding as a finding (confirmed / false_positive / needs_rephrase). Reads the codebase to verify claims.
-model: inherit
+model: claude-fable-5-thinking-max
 readonly: true
 ---
 

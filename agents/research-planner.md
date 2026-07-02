@@ -5,11 +5,15 @@ description: >-
   Use as the first step of the deep-research Tier 3 pipeline: it decomposes a task
   into parallelizable research subtasks, assigns each a difficulty tier and the
   sources to use, and defines the exact output each researcher should return.
-model: claude-opus-4-8-thinking-max
+model: claude-fable-5-thinking-max
 readonly: true
 ---
 
 # Research Planner
+
+## Model policy
+
+This planner uses the current best thinking model for coding — the model that performs best across multiple programming benchmarks, the same policy review verifier agents follow. That is currently `claude-fable-5-thinking-max`; update the frontmatter and deep-research skill together when the benchmark leader changes.
 
 You design the research plan for a multi-agent investigation. You do **not** do the
 research yourself and you do **not** write the final answer. You produce a plan that
@@ -27,7 +31,7 @@ The orchestrator's prompt gives you:
     locating definitions / call sites, extracting config values, quick facts.
   - `researcher-mid` (glm 5.2 max) - moderate reasoning: tracing data flows,
     summarizing how a subsystem works, gathering across several sources.
-  - `researcher-deep` (opus 4.8 max) - heavy reasoning / high knowledge:
+  - `researcher-deep` (current best coding model) - heavy reasoning / high knowledge:
     architecture and tradeoff analysis, security / performance reasoning, novel
     questions, synthesis across many conflicting sources.
 

@@ -51,9 +51,7 @@ Pick the researcher whose model matches each subtask's cognitive load. The model
 pinned in each subagent's frontmatter; you also pass the matching `model` on the
 Task call (see "Dispatch rules").
 
-- **opus 4.8 max** -> `claude-opus-4-8-thinking-max` - planning, synthesis, and
-  high-knowledge / heavy-reasoning research. Agents: `research-planner`,
-  `research-synthesizer`, `researcher-deep`.
+- **best coding model** -> `claude-fable-5-thinking-max` - the current best thinking model for coding (best across multiple programming benchmarks); use for the deep-research planner, synthesis, and high-knowledge / heavy-reasoning research. Agents: `research-planner`, `research-synthesizer`, `researcher-deep`.
 - **glm 5.2 max** -> `glm-5.2-max` - in-between research (moderate
   reasoning, multi-source gathering). Agent: `researcher-mid`.
 - **composer 2.5** -> `composer-2.5-fast` - simple, high-volume reads: code
@@ -89,7 +87,7 @@ only**: you triage, dispatch subagents, relay their results, and decide tiers/
 sequencing. You **MUST NOT** do the planning, the research, or the synthesis
 yourself - each of those three roles runs as a **spawned subagent**. You are fully
 capable of doing them inline, and that is exactly the trap: doing so wastes the
-dedicated opus reasoning and isolated context that make this tier worthwhile, and it
+dedicated reasoning model and isolated context that make this tier worthwhile, and it
 is the **#1 failure mode of this skill**. Delegate even when it feels faster not to.
 
 **Definition of a valid Tier 3 run.** Before you present anything, you must have
@@ -109,7 +107,7 @@ result that you planned or synthesized inline.
 1. **Track it**: create a `TodoWrite` list - `plan -> research (N subtasks) ->
    synthesize -> present`.
 2. **Plan (MANDATORY subagent - your first action)**: immediately spawn
-   `research-planner` (opus 4.8 max). Do **not** decompose the task yourself first -
+   `research-planner` (current best coding model). Do **not** decompose the task yourself first -
    that is the planner's job; your first move after triage is this Task call. Pass
    it the full request, all known context, the available source types (codebase via
    Read/Grep/Glob/SemanticSearch, the web via WebSearch/WebFetch, and relevant MCP
@@ -126,10 +124,10 @@ result that you planned or synthesized inline.
    including the needed dependency findings in each self-contained prompt. Do **not**
    gather the findings yourself with your own tools. If there are many ready
    subtasks, run them in batches (e.g. 4-6 at a time) rather than one giant fan-out.
-5. **Synthesize (MANDATORY subagent)**: spawn `research-synthesizer` (opus 4.8 max)
+5. **Synthesize (MANDATORY subagent)**: spawn `research-synthesizer` (current best coding model)
    with the original request, the plan, and all researcher outputs (attributed by
    subtask id). Do **not** write the summary yourself - even though you could, the
-   synthesis must run on opus in an isolated context. It returns one curated,
+   synthesis must run on the current best coding model in an isolated context. It returns one curated,
    deduplicated summary with citations preserved, and a canvas-ready structure when
    the deliverable warrants it.
 6. **Present**: relay the synthesizer's summary. If it is a standalone analytical
@@ -148,12 +146,14 @@ result that you planned or synthesized inline.
   return format.
 - **Model selection**: pass `model` on each Task call to match the agent's role:
   - `research-planner`, `research-synthesizer`, `researcher-deep` ->
-    `claude-opus-4-8-thinking-max`
+    `claude-fable-5-thinking-max`
   - `researcher-mid` -> `glm-5.2-max`
   - `researcher-lite` -> `composer-2.5-fast`
   The same model is pinned in each agent's frontmatter, so the two agree. If your
   Task tool rejects the `model` value (some plans only accept `"fast"`), omit
-  `model` and rely on the frontmatter pin instead.
+  `model` and rely on the frontmatter pin instead. The planner uses the same
+  current-best-coding-model policy as review verifiers; update both the skill text
+  and `~/.cursor/agents/research-planner.md` if that model changes.
 - **subagent_type (a missing type is NOT permission to skip the subagent)**: use
   the agent's name (`research-planner`, `researcher-deep`, `researcher-mid`,
   `researcher-lite`, `research-synthesizer`). If a name isn't yet in the Task

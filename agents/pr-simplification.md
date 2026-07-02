@@ -1,7 +1,7 @@
 ---
 name: Plan Simplification & Maintainability
 description: Use as part of multi-agent plan review. Evaluates whether the plan's proposed work is the simplest path that meets the goal — flags premature abstraction, over-engineering, and reuse misses.
-model: inherit
+model: gpt-5.5-extra-high
 readonly: true
 ---
 

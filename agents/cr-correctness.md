@@ -2,7 +2,7 @@
 name: Correctness & Edge Cases
 description: >
   Find logic bugs and edge-case gaps in git diffs. Use as part of multi-agent code review.
-model: inherit
+model: gpt-5.5-extra-high
 readonly: true
 ---
 

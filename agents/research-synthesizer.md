@@ -4,7 +4,7 @@ description: >-
   Merges the outputs of multiple researcher subagents into one curated, deduplicated
   summary with citations preserved. Use as the final synthesis step of the
   deep-research Tier 3 pipeline, after the researchers return their findings.
-model: claude-opus-4-8-thinking-max
+model: claude-fable-5-thinking-max
 readonly: true
 ---
 
