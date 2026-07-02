@@ -37,18 +37,22 @@ The reviewers are native Cursor agents in `.cursor/agents/`:
 
 Each reviewer:
 - Has `readonly: true` (cannot modify files)
-- Has `model: inherit` (uses the same model as this chat)
+- Runs on `model: gpt-5.5-extra-high` (set it on the Task call)
 - Returns structured findings or an exact "no issues" string
 
-**CRITICAL: Do NOT set the `model` parameter on any Task tool call** — for the reviewers, the verifier, or the implementer. Omitting `model` makes the subagent inherit the parent chat model. Setting `model: "fast"` (or any other value) downgrades to a weaker model and produces lower-quality output. This applies to both the named-subagent path and the `generalPurpose` fallback path described in the Verification and Fix step sections below.
+**CRITICAL: Set the `model` parameter on every Task tool call.** Use `gpt-5.5-extra-high` for reviewer and implementer subagents. Use `claude-fable-5-thinking-max` for the verifier subagent. Omitting `model` makes the subagent inherit the parent chat model, which can silently weaken verification quality. This applies to both the named-subagent path and the `generalPurpose` fallback path described in the Verification and Fix step sections below.
+
+## Model policy
+
+Verifier subagents must use the current best thinking model for coding — the model that performs best across multiple programming benchmarks. That is currently `claude-fable-5-thinking-max`. Non-verifier code-review subagents use `gpt-5.5-extra-high` unless this policy is intentionally updated. When changing this section, also update the matching agent frontmatter in `.cursor/agents/`.
 
 ## Verification
 
 After the 7 reviewers complete (but before synthesis), launch the **Code Review Verifier** as a single subagent to filter the reviewer findings. The verifier tags each finding as `confirmed`, `false_positive`, or `needs_rephrase`.
 
-**CRITICAL: Do NOT set the `model` parameter on the Task tool call for the verifier.** It must inherit the parent chat model (same rule as the reviewers).
+**CRITICAL: Set `model: "claude-fable-5-thinking-max"` on the Task tool call for the verifier.** The verifier must run on the current best thinking model for coding (see Model policy).
 
-**Subagent dispatch**: prefer `subagent_type: "Code Review Verifier"`. If Cursor's session enum does not yet contain that type (e.g. the agent file was added since session start), fall back to `subagent_type: generalPurpose` with the full `cr-verifier.md` body inlined as the prompt.
+**Subagent dispatch**: prefer `subagent_type: "Code Review Verifier"`. If Cursor's session enum does not yet contain that type (e.g. the agent file was added since session start), fall back to `subagent_type: generalPurpose` with the full `cr-verifier.md` body inlined as the prompt. For either dispatch path, pass `model: "claude-fable-5-thinking-max"`.
 
 **Input to pass**: the git diff + changed file paths, plus all 7 reviewer outputs concatenated with source attribution (e.g. `[Security]`, `[Correctness]`, ...).
 
@@ -144,9 +148,9 @@ Apply 3 approved fixes now via the implementer subagent? [yes / no / edit list]
 
 After fixes apply, suggest: "If you want to verify nothing regressed, re-invoke `/code-review` and re-run your tests."
 
-**CRITICAL: Do NOT set the `model` parameter on the Task tool call for the implementer.** Same rule as the reviewers and the verifier — omit `model` to inherit the parent chat model.
+**CRITICAL: Set `model: "gpt-5.5-extra-high"` on the Task tool call for the implementer.** The implementer is a non-verifier review agent and uses the same preferred model as the reviewers.
 
-**Subagent dispatch**: prefer `subagent_type: "Code Review Implementer"`. If not in the session enum, fall back to `subagent_type: generalPurpose` with the full `cr-implementer.md` body inlined as the prompt.
+**Subagent dispatch**: prefer `subagent_type: "Code Review Implementer"`. If not in the session enum, fall back to `subagent_type: generalPurpose` with the full `cr-implementer.md` body inlined as the prompt. For either dispatch path, pass `model: "gpt-5.5-extra-high"`.
 
 ## Review-only mode
 

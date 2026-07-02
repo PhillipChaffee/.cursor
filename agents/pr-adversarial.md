@@ -1,7 +1,7 @@
 ---
 name: Adversarial Reviewer
 description: Use as part of multi-agent plan review. Challenges premises, hidden assumptions, and approach selection. Runs a strategic pre-mortem and steelmans alternatives.
-model: inherit
+model: gpt-5.5-extra-high
 readonly: true
 ---
 

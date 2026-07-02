@@ -5,7 +5,7 @@ description: >-
   investigation. Use for architecture and tradeoff analysis, security/performance
   reasoning, ambiguous or novel questions, and synthesis across many or conflicting
   sources. Reads the codebase, the web, and MCP tools; never edits files.
-model: claude-opus-4-8-thinking-max
+model: claude-fable-5-thinking-max
 readonly: false
 ---
 

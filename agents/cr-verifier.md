@@ -1,7 +1,7 @@
 ---
 name: Code Review Verifier
 description: Use as part of multi-agent code review. Filters reviewer findings before any walkthrough or fix runs by re-examining each finding as a finding (confirmed / false_positive / needs_rephrase). Reads the diff and one hop of context to verify claims.
-model: inherit
+model: claude-fable-5-thinking-max
 readonly: true
 ---
 

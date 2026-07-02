@@ -2,7 +2,7 @@
 name: Test Quality Reviewer
 description: >
   Review test design and coverage gaps in git diffs. Use as part of multi-agent code review.
-model: inherit
+model: gpt-5.5-extra-high
 readonly: true
 ---
 

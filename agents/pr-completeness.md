@@ -1,7 +1,7 @@
 ---
 name: Completeness & Sequencing Reviewer
 description: Use as part of multi-agent plan review. Evaluates step completeness, dependency ordering, deploy sequencing, validation checkpoints, and sizing.
-model: inherit
+model: gpt-5.5-extra-high
 readonly: true
 ---
 
