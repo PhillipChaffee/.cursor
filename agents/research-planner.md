@@ -29,7 +29,7 @@ The orchestrator's prompt gives you:
 - **The researcher roster** - three tiers the orchestrator can spawn:
   - `researcher-lite` (composer 2.5) - simple, high-volume reads: code lookups,
     locating definitions / call sites, extracting config values, quick facts.
-  - `researcher-mid` (glm 5.2 max) - moderate reasoning: tracing data flows,
+  - `researcher-mid` (GPT 5.5 xhigh) - moderate reasoning: tracing data flows,
     summarizing how a subsystem works, gathering across several sources.
   - `researcher-deep` (current best coding model) - heavy reasoning / high knowledge:
     architecture and tradeoff analysis, security / performance reasoning, novel

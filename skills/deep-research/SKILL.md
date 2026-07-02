@@ -52,7 +52,7 @@ pinned in each subagent's frontmatter; you also pass the matching `model` on the
 Task call (see "Dispatch rules").
 
 - **best coding model** -> `claude-fable-5-thinking-max` - the current best thinking model for coding (best across multiple programming benchmarks); use for the deep-research planner, synthesis, and high-knowledge / heavy-reasoning research. Agents: `research-planner`, `research-synthesizer`, `researcher-deep`.
-- **glm 5.2 max** -> `glm-5.2-max` - in-between research (moderate
+- **GPT 5.5 xhigh** -> `gpt-5.5-extra-high` - in-between research (moderate
   reasoning, multi-source gathering). Agent: `researcher-mid`.
 - **composer 2.5** -> `composer-2.5-fast` - simple, high-volume reads: code
   lookups, fact-finding, "where/what is X". Agent: `researcher-lite`.
@@ -147,7 +147,7 @@ result that you planned or synthesized inline.
 - **Model selection**: pass `model` on each Task call to match the agent's role:
   - `research-planner`, `research-synthesizer`, `researcher-deep` ->
     `claude-fable-5-thinking-max`
-  - `researcher-mid` -> `glm-5.2-max`
+  - `researcher-mid` -> `gpt-5.5-extra-high`
   - `researcher-lite` -> `composer-2.5-fast`
   The same model is pinned in each agent's frontmatter, so the two agree. If your
   Task tool rejects the `model` value (some plans only accept `"fast"`), omit
