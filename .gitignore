@@ -1,0 +1,20 @@
+# Ignore everything by default; un-ignore only what this repo versions.
+# Intentionally NOT listing excluded work/skill names — naming them in a
+# public file would itself leak internal tooling info. The repo lives in
+# its own folder, so anything we don't cp in simply isn't here.
+*
+
+!.gitignore
+!README.md
+!LICENSE
+
+!skills/
+!skills/**
+!agents/
+!agents/**
+!rules/
+!rules/**
+
+**/.DS_Store
+**/__pycache__/
+**/*.pyc

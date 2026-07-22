@@ -1,0 +1,58 @@
+---
+description: When creating or updating Cursor skills, follow /create-skill.
+alwaysApply: true
+---
+
+# Skill Creation
+
+Whenever you create or update a Cursor skill (`SKILL.md` or skill folder), you must use the built-in `/create-skill` skill first.
+
+## Mandatory workflow
+
+1. **Read and follow** `/create-skill` (`~/.cursor/skills-cursor/create-skill/SKILL.md`) before writing or editing any skill. Do not invent structure, frontmatter, or description style from memory.
+2. Apply the same discipline for rules with `/create-rule` when creating or editing Cursor rules.
+3. Put workflow detail in the skill body. Keep frontmatter for discovery only.
+
+## Frontmatter (required and fragile)
+
+Cursor loads skills from YAML frontmatter. Invalid YAML means the skill does not load (slash command and auto-invoke both fail).
+
+```yaml
+---
+name: skill-folder-name
+description: >-
+  Short what + when. Use a folded block scalar when the text is more than one
+  short phrase or contains colons.
+---
+```
+
+- `name`: lowercase letters, numbers, hyphens only; must match the parent folder name; max 64 chars.
+- `description`: non-empty; max 1024 characters; third person; WHAT the skill does and WHEN to use it. Discovery text only, not a design doc.
+- Prefer `description: >-` for anything longer than one short line, or whenever the text contains colons.
+- Optional fields only as documented (`paths`, `disable-model-invocation`, `metadata`). See https://cursor.com/docs/context/skills
+
+## Never do this
+
+- Edit or author a skill without reading `/create-skill` in that turn.
+- Unquoted single-line `description:` containing a colon (e.g. `overview: ...` or `Modes: ...`) — YAML treats that as a nested mapping and the skill breaks.
+- Em dashes, unescaped quotes, or XML angle brackets (`<` `>`) in frontmatter.
+- Stuffing multi-paragraph workflow into `description`.
+
+## After every create or update
+
+Validate before finishing:
+
+```bash
+python3 -c "
+import yaml
+from pathlib import Path
+text = Path('PATH/TO/SKILL.md').read_text()
+fm = text.split('---', 2)[1]
+data = yaml.safe_load(fm)
+assert data.get('name')
+assert isinstance(data.get('description'), str) and 0 < len(data['description']) <= 1024
+print('OK', data['name'], len(data['description']))
+"
+```
+
+If parse fails, fix the frontmatter before committing or declaring done.
