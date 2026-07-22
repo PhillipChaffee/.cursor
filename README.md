@@ -1,66 +1,131 @@
-# Personal Cursor skills, agents, and rules
+# .cursor
 
-Portable Cursor kit: research, code/plan/MR review, refactor planning, CI hygiene, and a generic `/ship` orchestrator. Intended as a **cherry-pick source** for Cursor User Rules (and optional project `.cursor/` copies)—not as a bulk dump into `~/.cursor/`.
+A personal collection of Cursor skills, subagents, and rules for research, code
+review, plan review, MR review, refactor planning, ticket shipping, and
+merge/CI hygiene. Python/Django + GitLab-flavored, but the review and planning
+workflows are generic.
 
-## Install (recommended): User Rules
+Feel free to borrow anything useful. Use it as a starting point for your own
+setup rather than a polished, general-purpose plugin.
 
-Pick individual items and add them through the Cursor UI so they apply to both local and Cloud agents:
+## Install (primary)
 
-1. Browse this repo and open the specific rule or skill you want (start with [`rules/subagents.mdc`](rules/subagents.mdc)—highest leverage for when to delegate and which models to use).
-2. Open **Customize** in the sidebar → **Rules**.
-3. **Add Rule** (User Rule) and paste the contents.
-4. Repeat for any other rules or skills you want; skip the rest.
+**Cherry-pick User Rules in Cursor** — open **Cursor Settings → Rules**, then add
+individual User Rules by pasting the contents of the files you want from
+`rules/`. This is the recommended path for always-on conventions.
 
-Skills from this repo are optional extras when a project already ships its own `.cursor/skills/`.
-
-See [Cursor rules docs](https://cursor.com/docs/rules).
-
-## Alternate: copy into a project
-
-To use as project rules/skills for one repo:
+Secondary: copy selected folders into a project `.cursor/` (or into
+`~/.cursor/` for user-level skills/agents) when you want slash-command skills
+or subagents available in a workspace.
 
 ```bash
 git clone https://github.com/PhillipChaffee/.cursor.git
-cp -R .cursor/skills/* /path/to/your-project/.cursor/skills/
-cp -R .cursor/agents/* /path/to/your-project/.cursor/agents/
-cp -R .cursor/rules/* /path/to/your-project/.cursor/rules/
+# Then paste rule file bodies into Cursor Settings → Rules,
+# and/or copy skills/agents into a project .cursor/ or ~/.cursor/
 ```
 
-(Adjust paths if you cloned into a directory not named `.cursor`.) Prefer User Rules for Cloud parity.
+Cursor picks up project and user-level skills, agents, and rules on the next
+session. No install script — take only what looks useful.
 
-## Catalog
+## What's here
 
-### Skills
+### `skills/`
 
-| Skill | Purpose |
-|-------|---------|
-| `ship` | Orchestrate ticket → research → plan → implement → verify → MRs |
-| `deep-research` | Tiered research with parallel collectors + synthesis |
-| `code-review` | Multi-agent code review harness |
-| `looping-code-review` | Review → fix → push → re-review loop |
-| `plan-review` | Multi-agent plan review |
-| `clean-plan` | Slim plans for simple implementer models |
-| `mr-review` | GitLab MR review with draft notes |
-| `pre-mr-checklist` | Pre-MR verification checklist |
-| `ci-lint-test` | Run a project's CI lint/test jobs locally |
-| `refactor-planner` | Refactor planning with placement scouts |
+- `ship` — orchestrate Linear ticket work from intake (or a problem paste)
+  through research, plan, implement, verify, and GitLab MRs
+- `deep-research` — tiered research workflow that scales effort to the task
+  (direct answer, parallel researchers, or a full planner → research →
+  synthesis pipeline)
+- `code-review` — multi-reviewer code review that dispatches specialized
+  subagents and synthesizes findings (ships `checklists.md` + `examples.md`)
+- `looping-code-review` — iteratively review, apply minimal verified fixes,
+  test, push, and re-review within a fixed growth budget
+- `plan-review` — multi-reviewer plan/design review pipeline
+- `mr-review` — review a GitLab MR end-to-end via the GitLab MCP, surface
+  findings for approval, then post selected comments as draft notes
+- `refactor-planner` — design a behavior-preserving refactor before touching
+  code (ships a `references/` catalog of refactor patterns and placement guides)
+- `clean-plan` — tidy an implementation plan so an agent can execute it cleanly
+- `pre-mr-checklist` — pre-merge checklist (inline imports, type annotations,
+  logging, test coverage, secrets, feature-flag checks, etc.)
+- `ci-lint-test` — run a project's CI lint/test steps locally before pushing
 
-### Agents
+### `agents/`
 
-Code-review (`cr-*`), plan-review (`pr-*`), refactor scouts, and research agents (`researcher-*`, `research-planner`, `research-synthesizer`), including `cr-organization` for file/folder placement.
+Subagents the skills dispatch to:
 
-### Rules
+- Code-review reviewers: `cr-security`, `cr-correctness`, `cr-performance`,
+  `cr-architecture`, `cr-organization`, `cr-test-quality`, `cr-deployment-safety`,
+  `cr-simplification`, plus `cr-planner`, `cr-verifier`, and `cr-implementer`
+- Plan-review reviewers: `pr-problem-scope`, `pr-feasibility`,
+  `pr-risk-rollback`, `pr-completeness`, `pr-adversarial`, `pr-architecture`,
+  `pr-simplification`, `pr-verifier`, `pr-implementer`
+- Refactor scouts: `refactor-code-scout`, `refactor-placement-scout`
+- Research agents: `research-planner`, `research-synthesizer`,
+  `researcher-lite`, `researcher-mid`, `researcher-deep`
 
-- **Workflow:** `subagents`, `plan-steps`, `engineering`, `merge-requests`, `minimal-changes`, `linear-tickets`
-- **Python:** `python`, `python-class-sections`, `python-docstrings-google`, `python-pytest`
-- **Tooling:** `github-vs-gitlab-mcp`, `django-migrations`, `comment-style`, `skill-creation`, `code-organization`
-- **Docs:** `design-docs` (`alwaysApply: false`), `mr-review-chat-title`
-- **Template:** `writing-voice` (`alwaysApply: false`) — fill in before enabling
+### `rules/`
+
+Always-applied conventions (unless noted):
+
+- Python style, pytest, Google-style docstrings, class-section headers
+  (`python`, `python-pytest`, `python-docstrings-google`, `python-class-sections`)
+- Workflow conventions: `engineering`, `minimal-changes`, `plan-steps`,
+  `merge-requests`, `linear-tickets`
+- Writing style and process: `comment-style`, `subagents`, `skill-creation`,
+  `code-organization`, `mr-review-chat-title`
+- Tooling: `django-migrations`, `github-vs-gitlab-mcp`
+- Optional: `design-docs` (`alwaysApply: false`), `writing-voice` (template;
+  `alwaysApply: false`)
 
 ## Personalizing the writing-voice rule
 
-[`rules/writing-voice.mdc`](rules/writing-voice.mdc) ships as a **template**. Replace every `<...>` placeholder with your own voice, then enable the rule (`alwaysApply: true` or via Settings). Until you fill it in, leave it disabled so it does not inject empty guidance.
+`rules/writing-voice.mdc` ships as a **fill-in template**. It is disabled by
+default (`alwaysApply: false`). Before enabling it:
+
+1. Fill each section with your own capitalization, slang, tone, and examples.
+2. Replace the fictional worked example with your real voice samples (redacted).
+3. Set `alwaysApply: true` only after the template no longer contains placeholders.
+
+## How I use it (the workflow this is built for)
+
+I run a **fast, pretty-smart model as my main-window agent** — the one I'm
+iterating in all day — instead of the slowest, most expensive model. The
+expensive model would do fine in the main window, but it's slower and costs
+more, and for most turn-by-turn work the fast one is enough.
+
+What makes that viable is **delegating the heavy thinking to subagents** so it
+happens in isolated context windows rather than the main one:
+
+- **Research and code review get kicked off as subagents as I go.** The main
+  agent stays cheap and responsive while a `researcher-*` or `cr-*` agent spins
+  up in its own context to do the in-depth investigation or review, then returns
+  just the synthesis. The always-on `subagents` rule is the source of truth for
+  delegation, model selection, and dispatch behavior.
+- **When something genuinely needs the smartest agent and real deep thinking**
+  (architecture calls, ambiguous investigations, deep research), I dispatch it
+  specifically to a slower, smarter subagent — e.g. `researcher-deep` or the
+  top-tier plan-review agents. I get the heavy model's reasoning where it
+  matters without paying for it on every turn.
+
+The second reason I do this, beyond cost and speed, is **keeping the main
+context window clean.** Because the deep work happens in subagent contexts and
+only the distilled result comes back, the main window doesn't fill up with
+transcripts, large reads, or intermediate reasoning. That lets me keep going in
+one agent for a long time without ever having to summarize context to keep
+working.
+
+## Notes
+
+- `mr-review` can optionally load a review-voice rule if you keep one in
+  `~/.cursor/rules/`; it's not required. Use `writing-voice` as a starting
+  template if you want one.
+- Some skills/agents reference each other (e.g. `code-review` and `plan-review`
+  dispatch to the `cr-*` / `pr-*` agents); copy the matching `agents/` files so
+  the cross-references resolve.
+- `/ship` may hand off to an external `/babysit` skill if you have one installed;
+  it is not included here.
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT — borrow freely.
