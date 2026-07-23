@@ -117,16 +117,18 @@ working.
 
 ### Most used skills
 
-Day to day I mostly reach for `ci-lint-test`, `looping-code-review`,
-`deep-research`, `mr-review`, and `clean-plan` — local CI before a push, a
-review → fix → re-review loop, real investigation when a question needs it,
-GitLab MR review, and tidying a plan before an agent executes it. When a change
-needs a fuller multi-reviewer pass I use `plan-review` or `code-review`.
-`pre-mr-checklist` shows up more as shipping hygiene than as something I
-slash-invoke on its own. `ship` and `refactor-planner` are in the catalog for
-larger ticket and refactor flows, but they are not my default slash commands.
-The full list of skills is under [What's here](#whats-here); this is just what
-I actually reach for most often.
+What I actually reach for day to day (full catalog under
+[What's here](#whats-here)):
+
+- `ci-lint-test` — local CI / lint / test before a push
+- `looping-code-review` — review → fix → re-review
+- `deep-research` — when a question needs a real investigation
+- `mr-review` — GitLab MR review end to end
+- `clean-plan` — tidy a plan before an agent executes it
+- `plan-review` / `code-review` — fuller multi-reviewer pass when the change warrants it
+
+Less often as slash commands: `pre-mr-checklist` (shipping hygiene), `ship` and
+`refactor-planner` (larger ticket / refactor flows).
 
 ## Notes
 
