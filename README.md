@@ -73,7 +73,7 @@ Always-applied conventions (unless noted):
 - Workflow conventions: `engineering`, `minimal-changes`, `plan-steps`,
   `merge-requests`, `linear-tickets`
 - Writing style and process: `comment-style`, `subagents`, `skill-creation`,
-  `code-organization`, `mr-review-chat-title`
+  `code-organization`, `mr-review-chat-title`, `babysit`
 - Tooling: `django-migrations`, `github-vs-gitlab-mcp`
 - Optional: `design-docs` (`alwaysApply: false`), `writing-voice` (template;
   `alwaysApply: false`)
