@@ -115,6 +115,24 @@ transcripts, large reads, or intermediate reasoning. That lets me keep going in
 one agent for a long time without ever having to summarize context to keep
 working.
 
+### Normal workflow path
+
+Shipping a ticket, in order. `/ship` runs this whole path for you; I also
+often run the steps myself:
+
+1. `deep-research` — investigate before planning
+2. draft a plan (plan-steps rule; not a skill)
+3. `plan-review` — multi-reviewer pass on the plan
+4. `clean-plan` — make the plan agent-executable
+5. implement
+6. `ci-lint-test` + `pre-mr-checklist` — verify before push
+7. open MRs
+8. `looping-code-review` — review → fix → re-review on the branch
+
+Side paths: `mr-review` for reviewing someone else's GitLab MR; `code-review`
+when I want a multi-reviewer pass on a diff without the loop; `refactor-planner`
+before a behavior-preserving refactor.
+
 ### Most used skills
 
 What I actually reach for day to day (full catalog under
