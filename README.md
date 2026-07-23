@@ -128,6 +128,7 @@ often run the steps myself:
 6. `ci-lint-test` + `pre-mr-checklist` — verify before push
 7. open MRs
 8. `looping-code-review` — review → fix → re-review on the branch
+9. `/babysit` — keep the MR merge-ready (external skill; not in this repo)
 
 Side paths: `mr-review` for reviewing someone else's GitLab MR; `code-review`
 when I want a multi-reviewer pass on a diff without the loop; `refactor-planner`
