@@ -13,7 +13,7 @@ Drive a plan to "ready" in two phases:
 
 1. **Phase 1 — Architecture alignment**: review placement, naming, product-goal fit, and
    system fit; gate with the user until they declare aligned (or auto-ack once in
-   fully-autonomous mode).
+   fully-autonomous mode when the verdict is not Questions Only / unclear goal).
 2. **Phase 2 — Implementation convergence**: mirror `/looping-code-review` for plans —
    review-only plan-review → triage → `pr-implementer` → re-review until Approve with zero
    blockers.
@@ -64,7 +64,7 @@ stop for explicit user approval (non-FA) or abort with `stop_reason` (FA).
 | Mode | Phase 1 | Phase 2 |
 |------|---------|---------|
 | `plan-gated` / `continue-after-plan` | Gate each iteration until user says aligned | Strategic escalations pause for user |
-| `fully-autonomous` | One non-interactive pass; auto-ack | Auto tactical loop until Approve or anti-stall; Questions Only hard-stops |
+| `fully-autonomous` | One non-interactive pass; auto-ack only when not Questions Only / unclear goal | Auto tactical loop until Approve or anti-stall; Questions Only hard-stops |
 
 When invoked outside `/ship`, treat the session like `plan-gated` (interactive Phase 1)
 unless the user explicitly requests autonomous mode.
@@ -103,7 +103,9 @@ product goal → do not declare Phase 1 complete.
 
 - **plan-gated / continue-after-plan / interactive**: wait until the user declares the
   architecture aligned (or equivalent), or gives feedback / answers clarifying questions.
-- **fully-autonomous**: run Phase 1 once; do not wait. Set
+- **fully-autonomous**: run Phase 1 once; do not wait. If the Phase 1 verdict is
+  **Questions Only** or the product goal is still unclear, set `stop_reason` and hard-stop —
+  do **not** set `phase1_aligned` or enter Phase 2. Otherwise set
   `phase1_aligned: {at, acker: fully-autonomous}` in run-state / `decisions[]` and continue
   to Phase 2.
 

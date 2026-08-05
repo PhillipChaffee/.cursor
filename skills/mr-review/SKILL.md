@@ -3,15 +3,13 @@ name: mr-review
 description: >-
   Review a GitLab merge request end-to-end, or catch a reviewer up on MR status.
   Always opens with product overview, what the change does, and review-state
-  summary; posts findings as unpublished draft notes. On re-review it also posts
-  a thumbsup reaction and/or resolves your own threads whose fix it verified,
-  with no text reply. Use when reviewing a GitLab MR, given an MR link, or asking
-  where an MR stands.
+  summary; posts findings as unpublished draft notes. Use when reviewing a
+  GitLab MR, given an MR link, or asking where an MR stands.
 ---
 
 # GitLab MR Review
 
-Review a GitLab MR and post **every** finding as an **unpublished draft note** written in the reviewer's voice. Draft notes are visible only to their author until published, so the reviewer edits and selectively publishes them in the GitLab UI. This skill never publishes drafts. On re-review it does make up to two immediately-visible writes: a `thumbsup` reaction and/or a thread resolve on your own threads whose fix Step 3b verified good (Step 3c) — including on status-only and Stop-here runs. Every run opens with an MR overview and review-state summary (Step 3); that summary alone is the deliverable when the user only asks where an MR stands.
+Review a GitLab MR and post **every** finding as an **unpublished draft note** written in the reviewer's voice. Draft notes are visible only to their author until published, so the reviewer edits and selectively publishes them in the GitLab UI. This skill never publishes drafts. Every run opens with an MR overview and review-state summary (Step 3); that summary alone is the deliverable when the user only asks where an MR stands.
 
 ## Dependencies
 
@@ -110,7 +108,7 @@ If the MR description is empty or unclear, note this as a finding (the MR should
 
 `whoami` returns the identity of the **GitLab MCP token**, not necessarily the person asking for the review. Cloud agents, Cursor bots, and shared PATs often authenticate as a bot or unrelated account.
 
-**Lazy resolution.** Product overview, what-it-does, and MR snapshot never require `reviewer_username`. Resolve identity only when needed for: the "Your comments" table, Step 3c acks, Step 7 dedupe against the reviewer's threads, or posting draft notes.
+**Lazy resolution.** Product overview, what-it-does, and MR snapshot never require `reviewer_username`. Resolve identity only when needed for: the "Your comments" table, Step 7 dedupe against the reviewer's threads, or posting draft notes.
 
 When identity is needed, resolve `reviewer_username` in this order and **stop at the first match**:
 
@@ -128,8 +126,6 @@ Draft notes are private to the **authenticated token** author until published. B
 1. State in the report (and before posting): `reviewer_username` (or "unresolved") and `posting_username` from `whoami`.
 2. If `posting_username` is a bot/service/shared account, **do not call `create_draft_note`**. Tell the user drafts would land under that account and ask them to switch the GitLab MCP to a human token, or to explicitly confirm "post under bot anyway."
 3. If drafts were already created under the wrong author in a prior run, clean up with `list_draft_notes` / `delete_draft_note` under that same token.
-
-**Ack scope.** This hard-stop also gates the Step 3c writes (emoji reaction and thread resolve). For acks it owns the identity condition only — Step 3c owns its own per-thread conditions. Acks require `posting_username == reviewer_username` and a non-bot/service/shared `posting_username`. If `whoami` fails or returns no username, or `posting_username != reviewer_username`, or `posting_username` is bot/service/shared, make zero ack writes; report skip reason `identity` only when Step 3b produced at least one verdict, otherwise 3c's silent no-op governs. The "post under bot anyway" confirmation in item 2 applies to draft notes only and never authorizes an ack.
 
 Use `reviewer_username` (not raw `whoami`) everywhere Step 3/7 refer to "your comments."
 
@@ -177,51 +173,12 @@ Do **not** treat "any human discussion thread" (e.g. the author's notes) as re-r
 Resolve identity now if not already resolved (lazy rules in Step 1). If identity cannot be resolved without Ask and the user only wanted status, omit this subsection and note that personal thread catch-up needs a username.
 
 - **Prior threads** — threads authored by `reviewer_username`: the original ask, resolved/unresolved, and **how the fix was actually implemented** — verified against the checked-out branch code, not just the author's reply text.
-- **Assessment** — exactly one of these bare labels on its own line: `fix is good`, `pushback is reasonable`, `fix is incomplete`, `unanswered`. Any other wording makes the thread ineligible for a Step 3c ack.
+- **Assessment** — one short judgment per thread: fix is good / pushback is reasonable / fix is incomplete or left unanswered.
 - **What changed since the last review** — commits pushed after the reviewer's last review activity and what they touch.
 
 Keep this thread inventory — Step 7 uses it to avoid duplicate comments. Page `mr_discussions` to exhaustion before building it.
 
-Each inventory entry also records `discussion_id`; `assessment` (the bare label from above); `position` (the thread root's file path and line, or `null` for a general thread); the original ask text; `author_note_id`, the latest non-system note authored by the MR author, or `null` when the author never replied; `author_note_is_latest`; and `resolved`, derived from `notes[]` because discussions carry no `resolved` field — a thread is unresolved when any resolvable note is unresolved, and a thread with no resolvable note at all is not resolvable and never eligible for an ack.
-
-#### 3c. Thumbsup and resolve your own threads whose fix Step 3b verified good
-
-Runs before routing on every re-review exit, including Stop here. There is no confirmation prompt. When 3b did not run, or produced no verdicts, this step is a silent no-op: take no action and emit no report line.
-
-**Tool precondition.** All four tools must be available: `create_merge_request_note_emoji_reaction`, `list_merge_request_note_emoji_reactions`, `delete_merge_request_note_emoji_reaction`, `resolve_merge_request_thread`. If any is missing, make zero writes and report skip reason `tools unavailable`.
-
-**Pre-write check.** Call `get_merge_request` once before the first write. It supplies both:
-
-- `diff_refs.head_sha` — must equal the `head_sha` saved in Step 1 **and** the output of `git rev-parse HEAD` in the repo Step 2 checked out. A mismatch, or either value unavailable, means zero writes for the whole run; report skip reason `stale head`.
-- `merge_when_pipeline_succeeds` (also honor `auto_merge_enabled` when present) — treat auto-merge as armed when either field is true, or when neither field is present (fail closed, same as unavailable `head_sha`). When armed, run thumbsup-only for the whole run: make no `resolve_merge_request_thread` calls; the affirmative Actions row reports `thumbsup` (not `thumbsup + resolved`); the silent-fix row writes nothing and reports skip reason `auto-merge`.
-
-**Eligibility.** A thread qualifies only when all of these hold:
-
-1. The run is a re-review and `reviewer_username` is known.
-2. The thread root was authored by `reviewer_username`.
-3. Its Step 3b Assessment is the bare label `fix is good`.
-4. It is resolvable and currently unresolved (inventory `resolved` is false).
-5. The Step 1 posting-identity hard-stop marks the run eligible to ack.
-
-**Actions.** Branch on the inventory's two author facts. A note is *affirmative* when it asserts the fix was made (e.g. "fixed", "done", "pushed a fix"); a question, a deferral, a partial or conditional fix, or wording you cannot confidently classify is not affirmative.
-
-| Author note | Action | Report |
-|---|---|---|
-| Exists, is latest, and is affirmative | `thumbsup` on `author_note_id`, then resolve | `thumbsup + resolved` |
-| Exists but is not affirmative, or is not the latest note | none | `left for reply` |
-| None (`author_note_id` is `null`) | resolve only, no reaction | `resolved (silent fix)` |
-
-The reaction target is always `author_note_id` — never the thread root, another reviewer's note, or a bot's note. Before reacting, read `author_note_id`'s reactions with `list_merge_request_note_emoji_reactions`. An existing `thumbsup` from `posting_username` — e.g. a prior thumbsup-only auto-merge run — suppresses only the reaction: skip the create call and leave `award_id` `null`. Thumbsup-only (auto-merge armed) is the outer gate and wins over resolve: report skip reason `auto-merge` and make no resolve call. Otherwise still resolve and report `resolved` instead of `thumbsup + resolved`. The silent-fix branch leaves no reaction, so re-ack suppression there holds only within the current session. Take `award_id` from the create response only. If the create call errors, re-list reactions once; when a `thumbsup` by `posting_username` is present, treat the reaction as already present, leave `award_id` `null` (do not take an id from the lookup — that reaction may belong to a prior run), and continue to resolve unless this run is thumbsup-only; otherwise skip that thread's resolve and report skip reason `write failed`. If a resolve call errors — on the affirmative branch, on the suppressed-reaction branch, or on the silent-fix branch — keep any reaction that exists, leave `resolved_by_this_run` false, and report skip reason `write failed`, prefixed with `thumbsup` only when this run's own reaction succeeded.
-
-Every reaction call passes `discussion_id` alongside `note_id`. This step only targets notes inside a resolvable thread (`individual_note: false`), so `discussion_id` is always required.
-
-**Never post note text on these threads.** No discussion note, no draft reply, no "thanks" or "looks good". The reaction and the resolve are the entire response.
-
-**Run state.** For every thread this step touched, record `discussion_id`, `awarded_note_id`, `award_id` (`null` on the silent-fix branch and whenever this run made no reaction), and `resolved_by_this_run` (true only when this run's own `resolve_merge_request_thread` call succeeded — false under auto-merge, and false when the resolve failed). Step 9 drives undo writes from this record and takes mapping facts (`position`, original ask) from the Step 3b inventory entry with the same `discussion_id`.
-
-**After all writes.** Call `get_merge_request` once more to refresh the snapshot fields before 3d prints them. Compare the refreshed `diff_refs.head_sha` to the pre-write value; on a mismatch, report `head moved after acks` alongside the acks already made — do not retry or undo them. Report each thread's outcome. When a thread or the whole run wrote nothing for any reason other than `left for reply`, report a skip reason from this closed set: `stale head`, `tools unavailable`, `identity`, `not eligible`, `write failed`, `auto-merge`.
-
-#### 3d. Present and route
+#### 3c. Present and route
 
 Present in this format (omit "Your comments" / "What changed" unless 3b ran):
 
@@ -237,7 +194,7 @@ Present in this format (omit "Your comments" / "What changed" unless 3b ran):
 <what the MR is about, what it does, why it's needed>
 
 ### Your comments → status   (only if 3b ran)
-<table: # | your ask | status | how it was fixed | take on the fix | ack (outcome + discussion_id)>
+<table: # | your ask | status | how it was fixed | take on the fix>
 
 ### What changed since your last review   (only if 3b ran)
 <bullets: commit → what it touches>
@@ -251,7 +208,7 @@ Then route:
 - **First review** — continue directly to Step 4; its gate is the pause point.
 - **Re-review — Full re-review** — run Steps 5–10 on the whole MR; **skip Step 4** (alternatives gate) unless Step 3 flagged an approach-level risk.
 - **Re-review — Review only what changed** — run Steps 5–10 scoped to commits since the last review round; skip Step 4 unless the approach itself changed.
-- **Re-review — Stop here** — the overview was the goal; skip to Step 10 using the **overview-only report** (no draft counts, no publish reminders; still carry the Step 3c ack line and remind which repo is on the MR branch).
+- **Re-review — Stop here** — the overview was the goal; skip to Step 10 using the **overview-only report** (no draft counts, no publish reminders; still remind which repo is on the MR branch).
 - On re-review, ask once how to proceed (full / only-changed / stop) and **do not proceed until the user responds**. Do not add a second pause at Step 4 after "full re-review."
 
 ### Step 4: Evaluate alternative approaches (gate)
@@ -269,7 +226,7 @@ Using the **product purpose** from Step 1 and the high-level understanding from 
 - **Configuration over code** — Could the behavior change be driven by a config/feature flag, database setting, or environment variable instead of a code change?
 - **Existing abstractions** — Does the codebase already have a mechanism that could handle this (an existing hook, plugin system, event handler, middleware, etc.)?
 - **Simpler implementation** — Could fewer files be touched, fewer abstractions introduced, or a more straightforward approach accomplish the same thing?
-- **Different layer** — Would this be better handled at a different layer (e.g., database constraint instead of application validation, API gateway instead of per-service logic, frontend instead of backend)?
+- **Different layer** — Would this be better handled at a different layer (e.g., database constraint instead of application validation, API gateway instead of per-service logic, frontend instead of service-b)?
 - **Avoiding the change entirely** — Is there a reason the existing behavior is actually correct and the change is unnecessary?
 
 Only surface alternatives that are **concretely better** (simpler, safer, more maintainable, or more consistent with existing patterns). Do not raise alternatives just for the sake of it.
@@ -295,7 +252,7 @@ Then ask the user how to proceed:
 
 **Do not proceed to Step 5 until the user responds.** If the user chooses to stop, skip to Step 10 (report) and remind them which repo is on the MR branch.
 
-If the user already chose Full re-review in Step 3d, skip this gate and continue to Step 5 unless Step 3 flagged an approach-level risk.
+If the user already chose Full re-review in Step 3c, skip this gate and continue to Step 5 unless Step 3 flagged an approach-level risk.
 
 ### Step 5: Gather deep context
 
@@ -344,7 +301,7 @@ Signal review-only mode explicitly when invoking code-review so the orchestrator
 
 ### Step 7: Check for existing comments
 
-Before drafting anything, compare findings against existing MR discussions. **Do not** surface issues already covered by existing threads (from you or others). Exception: a thread acked in Step 3c may still be raised as a `blocker` finding this run — that is what triggers the Step 9 ack undo. Use `reviewer_username` (resolved lazily per Step 1) and the thread inventory from Step 3 — compare findings against that inventory instead of re-fetching discussions. Do not re-call `whoami` here for identity. Also list existing draft notes (`list_draft_notes`) — a previous review run may have left drafts, and duplicating them would clutter the reviewer's queue.
+Before drafting anything, compare findings against existing MR discussions. **Do not** surface issues already covered by existing threads (from you or others). Use `reviewer_username` (resolved lazily per Step 1) and the thread inventory from Step 3 — compare findings against that inventory instead of re-fetching discussions. Do not re-call `whoami` here for identity. Also list existing draft notes (`list_draft_notes`) — a previous review run may have left drafts, and duplicating them would clutter the reviewer's queue.
 
 ### Step 8: Write comments in the reviewer's voice
 
@@ -397,20 +354,12 @@ For comments on **deleted or context lines**, use `old_line` instead and set `ne
 
 Calculate `new_line` from the diff hunk header: `@@ -old_start,old_count +new_start,new_count @@`. Count lines from `new_start`, incrementing for context lines (no prefix) and added lines (`+` prefix), skipping deleted lines (`-` prefix).
 
-#### Undo acks invalidated later in this run
-
-A `blocker` finding maps to a thread acked in Step 3c when it lands on the same file and line as that thread's `position`, or when it restates that thread's original ask. Positional matching applies only to threads whose `position` is non-`null`; general findings and general threads map by restatement alone. Require exactly one matched acked thread; if zero or more than one match, report an ambiguous mapping and perform no undo writes.
-
-On a match, drive the undo from the Step 3c run state: call `delete_merge_request_note_emoji_reaction` only when `award_id` is non-`null`, passing `note_id=<awarded_note_id>`, `award_id`, and `discussion_id`; then `resolve_merge_request_thread` with `resolved: false` only when `resolved_by_this_run` is true. Never touch a reaction or a resolution this run did not create. An undo is *half-completed* when it attempted both writes and only one succeeded; when the only write it attempted fails, the ack stands unchanged and the thread stays in the acked count. Report each undo, and each half-completed undo, with its `discussion_id`; do not retry either.
-
 ### Step 10: Report to user
 
 Report depends on how the run exited:
 
-- **Overview-only exit** (user chose Stop here, or asked only for status): report identity line, the Step 3c ack line, that no drafts were created, repo/branch reminder. Do not list draft findings or publish reminders.
+- **Overview-only exit** (user chose Stop here, or asked only for status): report identity line, that no drafts were created, repo/branch reminder. Do not list draft findings or publish reminders.
 - **Full review exit**: existing draft-note summary (counts, severity labels, publish reminder, repo/branch reminder). If posting was hard-stopped for a bot token, say so and list that zero drafts were created.
-
-Both exits carry one ack line: `Acked N · skipped M — <reasons>`. `N` counts only threads still acked after any Step 9 undo. `M` counts eligible threads this run left with zero surviving ack writes of its own and a skip reason from 3c's closed set; a thread with a partial write — a reaction that landed while the resolve did not — counts in `N` instead and still prints its `write failed` reason, and a `left for reply` thread counts in neither tally. Threads undone in Step 9 are listed separately as `undone: <discussion_id>` and are not counted in `M`; a half-completed undo lists as `undo incomplete: <discussion_id>` and counts in neither `N` nor `M`. Omit the whole line when Step 3c no-oped.
 
 For a full review exit, summarize the drafts created:
 
@@ -426,9 +375,9 @@ For a full review exit, summarize the drafts created:
 If the user asks to re-review after the author pushes fixes:
 
 1. Pull latest on the MR branch (`git pull origin <source_branch>`) and re-fetch MR details, diffs, discussions (paged to exhaustion), and pipelines (head_sha will have changed)
-2. Re-run Step 3 — its review-so-far summary identifies resolved findings and what changed since the last round; the Step 3c ack pass re-reads eligibility from the refreshed inventory
+2. Re-run Step 3 — its review-so-far summary identifies resolved findings and what changed since the last round
 3. List existing draft notes (`list_draft_notes`) and delete drafts (`delete_draft_note`) that the new code makes obsolete
-4. Review per the user's routing choice in Step 3d (full re-review skips Step 4 unless approach risk)
+4. Review per the user's routing choice in Step 3c (full re-review skips Step 4 unless approach risk)
 5. Post new findings as draft notes only after the posting-identity hard-stop (same Step 9 flow) and report as in Step 10
 
 ## Line Number Calculation

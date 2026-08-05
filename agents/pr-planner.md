@@ -49,7 +49,7 @@ Return:
    and omission.
 4. **Reviewer models**: assign every selected reviewer `cursor-grok-4.5-high-fast`. Optionally
    list Fable upgrade candidates (reviewer + reason) for the main chat to apply when launching
-   subagents — use `claude-fable-5-thinking-xhigh` as the candidate slug. Do not treat those as
+   subagents — use `claude-fable-5-thinking-high` as the candidate slug. Do not treat those as
    launches you perform yourself.
 5. **Focus briefs**: exact risks and questions each selected reviewer should investigate.
 6. **Verifier instructions**: claims, interactions, and scope boundaries the verifier must check.

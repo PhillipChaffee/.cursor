@@ -105,7 +105,7 @@ Always-applied conventions (unless noted):
 - Workflow conventions: `engineering`, `minimal-changes`, `plan-steps`,
   `merge-requests`, `linear-tickets`
 - Writing style and process: `comment-style`, `subagents`, `skill-creation`,
-  `code-organization`, `mr-review-chat-title`, `babysit`, `look-it-up`
+  `code-organization`, `mr-review-chat-title`, `autopilot`, `look-it-up`
 - Tooling: `django-migrations`, `github-vs-gitlab-mcp`
 - Optional: `design-docs` (`alwaysApply: false`), `writing-voice` (template;
   `alwaysApply: false`)
@@ -198,8 +198,12 @@ only:
 `git add -A`. Never `git clean` or `git reset --hard` here.
 
 After Cursor updates, re-check that the personal allowlist still appears **after**
-the managed block and still wins (`git check-ignore -v --no-index mcp.json`
-should ignore; `README.md` should not).
+the managed block and still wins. From this directory:
+
+```bash
+git check-ignore -v --no-index mcp.json   # exit 0 — ignored by trailing `*`
+git check-ignore -q README.md && echo 'unexpectedly ignored' || echo 'not ignored'
+```
 
 ### Skill / agent coupling
 

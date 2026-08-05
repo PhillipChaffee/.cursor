@@ -46,7 +46,7 @@ Thin phase state machine that takes Linear ENG work from intake (or optional tic
 **Forbidden:** `Task`-wrapping the *orchestrator’s call* to `/deep-research`, `/looping-plan-review`, or `/plan-review` (or any child) so a subagent “runs ship phases” or returns a fake gate-passed summary. Nested orchestrator-in-Task is out of scope for the *parent* wrapping ship; if you *are* that nested agent, still execute this skill with the sequential fallback rather than aborting the whole run early.
 
 **Trusted child skills (only these may be read/executed by this orchestrator):**
-`deep-research`, `looping-plan-review`, `plan-review`, `clean-plan`, `ci-lint-test`, `pre-mr-checklist`, `looping-code-review`, plus `extra_verify` allowlist entries above. Reject any other skill name.
+`deep-research`, `looping-plan-review`, `plan-review`, `clean-plan`, `ci-lint-test`, `pre-mr-checklist`, `looping-code-review`, `autopilot` (external Cursor personal skill; optional handoff only), plus `extra_verify` allowlist entries above. Reject any other skill name.
 
 ## Modes
 
@@ -155,7 +155,7 @@ For every child-backed phase: **read and execute** the linked `SKILL.md` (or rul
 | `open_mrs` | `git push` + GitLab MCP `create_merge_request` | [`.cursor/rules/merge-requests/RULE.mdc`](../../rules/merge-requests/RULE.mdc), configure a GitLab MCP exposing `create_merge_request` + `get_merge_request` | `engineer_username` already in run-state; push each source branch first; create as **draft** (see [MR authorship](#mr-authorship)); assign initiating engineer when known; target each repo’s **default branch** (resolve via remote HEAD / project default — do not assume every repo uses `main`) unless stacking target is in `decisions[]`; idempotency via structured `mr_records`; on existing match re-check draft/author before skip | identity unresolved / post-create bot or author mismatch / create fail / push fail |
 | `linear_in_review` | `save_issue` + links | — | status + MR links set | status resolve fail |
 | `looping_review` | `/looping-code-review` | [`.cursor/skills/looping-code-review/SKILL.md`](../looping-code-review/SKILL.md) | zero true blockers | anti-stall / budget |
-| `autopilot_opt` | `/autopilot` → Cloud handoff → non-autopilot GitLab watch | autopilot is **external/personal** (not in the trusted skill allowlist); invoke only if that skill is present in the agent environment, else fall through | `autopilot_path` recorded; autonomous picks without asking | — |
+| `autopilot_opt` | `/autopilot` → Cloud handoff → non-autopilot GitLab watch | `/autopilot` is the sole trusted external handoff (listed in the trusted allowlist below); invoke only if that skill is present in the agent environment, else fall through | `autopilot_path` recorded; autonomous picks without asking | — |
 
 ### Implement vs verify / open_mrs (no duplicates)
 
@@ -275,6 +275,12 @@ mr_urls: []
 mr_records: []  # {repo, source_branch, target_branch, ticket, url, draft, author}
 extra_verify_results: []
 autopilot_path: autopilot | cloud_handoff | gitlab_watch_non_autopilot | skipped
+
+**Legacy resume normalization.** If an older run-state uses `babysit_opt` /
+`babysit_path`, map them to `autopilot_opt` / `autopilot_path` before continuing.
+Treat a completed legacy babysit path as already done (`autopilot_path` =
+`legacy_babysit`); do not re-run automation. An incomplete legacy path enters
+`autopilot_opt` with the same fallthrough rules as a fresh handoff.
 linear_status_writes: []
 stop_reason: null
 last_error: null

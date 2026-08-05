@@ -39,7 +39,7 @@ when something is actually wrong, not when a section header is absent.
 
 Before launching reviewers, run exactly one **Plan Review Planner** subagent.
 
-Use `cursor-grok-4.5-high-fast` by default. Upgrade to `claude-fable-5-thinking-xhigh` when
+Use `cursor-grok-4.5-high-fast` by default. Upgrade to `claude-fable-5-thinking-high` when
 the plan is clearly complex or high stakes: cross-service contracts, irreversible schema/deploy
 sequencing, auth or security boundaries, or a strategic rethink where premises are ambiguous.
 When unsure, stay on grok. The main chat applies any upgrade when launching the subagent; this
@@ -89,7 +89,7 @@ Each reviewer:
 - The Feasibility agent may read codebase files to verify plan assumptions
 
 Launch reviewers on `cursor-grok-4.5-high-fast` by default. Upgrade an individual reviewer to
-`claude-fable-5-thinking-xhigh` when that reviewer's domain needs deeper reasoning on this plan,
+`claude-fable-5-thinking-high` when that reviewer's domain needs deeper reasoning on this plan,
 or when the planner listed that reviewer as a Fable upgrade candidate with a reason. A review
 domain alone does not justify Fable. When unsure, stay on grok. The main chat applies any upgrade
 when launching the subagent; this skill does not switch models itself. Pass each model
@@ -104,12 +104,19 @@ If the `Task` tool is missing (nested subagent, restricted toolset, some Cloud a
 invent a single-pass self-review or fake Approve. Prefer this sequential role-artifact fallback
 on the current agent:
 
-1. Skip launching `pr-planner` as a subagent; record a one-line scope note in the synthesis
-   artifact instead (full roster below).
-2. Read each agent file under `.cursor/agents/` and run these roles **in order**, writing a
-   distinct artifact for each under `.cursor/plans/<TICKET-OR-PLAN-STEM>.plan-review-fanout/`:
-   `pr-problem-scope`, `pr-feasibility`, `pr-risk-rollback`, `pr-completeness`, `pr-adversarial`,
-   `pr-architecture`, `pr-organization`, `pr-naming`, `pr-simplification`, then `pr-verifier`.
+1. Run the planner role inline (read `pr-planner.md`) and record the selected roster in the
+   synthesis artifact — same selection rules as the Task path, including the
+   `architecture-alignment` preference set when that mode is active.
+2. Read each selected agent file under `.cursor/agents/` and run those roles **in order**,
+   writing a distinct artifact for each under
+   `.cursor/plans/<TICKET-OR-PLAN-STEM>.plan-review-fanout/`, then `pr-verifier`.
+   If the planner artifact cannot be produced, fall back to the mode default only:
+   - **architecture-alignment**: `pr-architecture`, `pr-organization`, `pr-naming`,
+     `pr-problem-scope`, `pr-adversarial`, `pr-simplification`, then `pr-verifier`.
+   - **default / review-only**: the full roster
+     (`pr-problem-scope`, `pr-feasibility`, `pr-risk-rollback`, `pr-completeness`,
+     `pr-adversarial`, `pr-architecture`, `pr-organization`, `pr-naming`,
+     `pr-simplification`, then `pr-verifier`).
 3. Do **not** run `pr-implementer` in this fallback path (implementer remains opt-in after the
    curated summary, same as the Task path).
 4. Synthesize `.cursor/plans/<TICKET-OR-PLAN-STEM>.plan-review.md` with the same output contract
@@ -133,10 +140,10 @@ environments. Callers must not hardcode a divergent role list; this skill is the
 
 After the selected reviewers complete (but before synthesis), launch the **Plan Review Verifier**
 as a single subagent to filter the reviewer findings. The verifier tags each finding as
-`confirmed`, `false_positive`, or `needs_rephrase`. The verifier owns deduplication.
+`confirmed`, `false_positive`, or `needs_rephrase`. Deduplicate near-duplicate findings in the parent chat **before** launching the verifier (merge same root cause; keep source tags). The verifier filters and rephrases; it does not own cross-reviewer deduplication.
 
 Use the named **Plan Review Verifier** agent on `cursor-grok-4.5-high-fast` by default. Upgrade
-to `claude-fable-5-thinking-xhigh` when verifying a large, conflicting, or high-stakes finding
+to `claude-fable-5-thinking-high` when verifying a large, conflicting, or high-stakes finding
 set where false-positive filtering needs deeper judgment. When unsure, stay on grok. The main
 chat applies any upgrade when launching the subagent; this skill does not switch models itself.
 If the type is unavailable, use `generalPurpose` with `pr-verifier.md` inlined and the same model.
