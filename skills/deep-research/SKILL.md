@@ -53,7 +53,7 @@ Pass the matching model explicitly on every subagent call and keep it aligned wi
 frontmatter.
 
 **Default every role to grok** (lite stays on composer). These roles formerly defaulted to Fable
-and may be upgraded to `claude-fable-5-thinking-max` when the criteria below apply:
+and may be upgraded to `claude-fable-5-thinking-high` when the criteria below apply:
 
 | Role | Upgrade when |
 |------|----------------|

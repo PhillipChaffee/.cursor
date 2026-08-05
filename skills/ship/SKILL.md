@@ -21,7 +21,7 @@ Thin phase state machine that takes Linear ENG work from intake (or optional tic
 - If neither is provided, ask which path (existing ticket vs paste a problem).
 - Optional: `out_of_scope`; `team` (Linear team name/key, default resolve ENG); `engineer_username` (GitLab username, e.g. `your-username` — resolve early; required before `open_mrs`); reviewer if not inferable.
 - Optional `extra_verify`: project-defined verify skills the user explicitly allowlists at invocation; reject names not explicitly provided by the user.
-- `skip_phases` forbidden by default for `intake`, `plan-review`, `verify` (and for `create-ticket` on the problem path). Recorded override only. Deny overrides in `continue-after-plan` / `fully-autonomous` unless explicitly overridden in run-state.
+- `skip_phases` forbidden by default for `intake`, `plan_review`, `verify` (and for `create_ticket` on the problem path). Recorded override only. Deny overrides in `continue-after-plan` / `fully-autonomous` unless explicitly overridden in run-state.
 
 ## Prerequisites
 
@@ -116,8 +116,9 @@ flowchart TD
   p2 -->|"triage + implementer"| p2
   p1 -->|"FA QuestionsOnly / unclear goal"| stopAsk
   p2 -->|QuestionsOnly| stopAsk
-  p2 -->|antiStall| stopAsk
-  p2 -->|strategicEscalation| stopAsk
+  p2 -->|"antiStall / strategicEscalation (FA)"| stopAsk
+  p2 -->|"antiStall / strategicEscalation (non-FA)"| humanGatePause[Human gate pause]
+  humanGatePause -->|resume after decide| p2
   p2 -->|Approve| residualAck[plan_ack human or auto]
   residualAck --> cleanPlan["/clean-plan"]
   cleanPlan --> modeGate{mode}

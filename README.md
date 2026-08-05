@@ -14,24 +14,52 @@ setup rather than a polished, general-purpose plugin.
 
 ## Install (primary)
 
-**On this machine:** clone or attach the Git remote so the worktree is
-`~/.cursor` itself. Cursor already loads `~/.cursor/skills/`,
-`~/.cursor/agents/`, and `~/.cursor/rules/` as user-level configuration.
+This repository's Git worktree **is** meant to be `~/.cursor`. Cursor already
+loads `~/.cursor/skills/`, `~/.cursor/agents/`, and `~/.cursor/rules/` as
+user-level configuration.
 
 **Cherry-pick User Rules in Cursor** — open **Cursor Settings → Rules**, then add
 individual User Rules by pasting the contents of the files you want from
 `rules/` if you prefer UI-managed always-on conventions.
 
-**On another machine or for a teammate:**
+### Live home worktree (`~/.cursor`)
+
+**Empty or missing `~/.cursor`:** clone is fine.
 
 ```bash
-# Option A — live home worktree (recommended if ~/.cursor is not already a repo)
-# Attach git to the existing ~/.cursor directory; do not clone into a non-empty dir.
-# See Notes → Git safety for the allowlist and staging rules.
+git clone https://github.com/PhillipChaffee/.cursor.git ~/.cursor
+```
 
-# Option B — secondary project install
+**Existing non-empty `~/.cursor` (usual case):** attach git — do **not**
+`git clone` into the directory, and never `git reset --hard` / `git clean -xfd`
+here (those can wipe Cursor app data).
+
+```bash
+cd ~/.cursor
+
+# 1) Preserve any local kit customizations before first sync
+mkdir -p ~/.cursor-kit-backup
+for item in skills agents rules; do
+  [ -e "$item" ] && cp -a "$item" ~/.cursor-kit-backup/
+done
+
+# 2) Attach remote without destroying untracked app data
+git init
+git remote add origin https://github.com/PhillipChaffee/.cursor.git 2>/dev/null || \
+  git remote set-url origin https://github.com/PhillipChaffee/.cursor.git
+git fetch origin
+git checkout -B main origin/main   # or: git checkout -B <branch> origin/<branch>
+# If checkout refuses because of local tracked conflicts, path-limited restore only:
+#   git checkout origin/main -- .gitignore README.md LICENSE skills agents rules
+
+# 3) Verify ignore allowlist (see Notes → Git safety)
+```
+
+### Secondary install (another machine / project copy)
+
+```bash
 git clone https://github.com/PhillipChaffee/.cursor.git
-# Copy selected skills/agents into a project .cursor/ (or into ~/.cursor/)
+# Copy selected skills/agents/rules into a project .cursor/ (or merge into ~/.cursor/)
 ```
 
 Cursor picks up project and user-level skills, agents, and rules on the next
@@ -197,12 +225,40 @@ only:
 **Always use path-limited staging** (`git add -- path…`). Never `git add .` or
 `git add -A`. Never `git clean` or `git reset --hard` here.
 
-After Cursor updates, re-check that the personal allowlist still appears **after**
-the managed block and still wins. From this directory:
+**Recovery:** if a path-limited checkout went wrong, use `git reflog` and restore
+only allowlisted paths from a known-good SHA
+(`git checkout <sha> -- .gitignore README.md LICENSE skills agents rules`).
+Ignored Cursor app data is **not** in git — restore it from Time Machine / your
+OS backup if damaged.
+
+After Cursor updates (or before pushing kit changes), re-check that the personal
+allowlist still appears **after** the managed block and still wins. From this
+directory:
 
 ```bash
-git check-ignore -v --no-index mcp.json   # exit 0 — ignored by trailing `*`
-git check-ignore -q README.md && echo 'unexpectedly ignored' || echo 'not ignored'
+# Sensitive / managed paths must stay ignored
+git check-ignore -v --no-index mcp.json
+git check-ignore -q --no-index projects/example/mcps/x.json \
+  || { echo 'FAIL: projects mcps should be ignored'; exit 1; }
+git check-ignore -q --no-index projects/example/agent-transcripts/x.jsonl \
+  || { echo 'FAIL: transcripts should be ignored'; exit 1; }
+git check-ignore -q --no-index plugins/cache/x \
+  || { echo 'FAIL: plugins should be ignored'; exit 1; }
+git check-ignore -q --no-index skills-cursor/x \
+  || { echo 'FAIL: skills-cursor should be ignored'; exit 1; }
+
+# Kit roots must stay trackable
+for p in README.md skills/ship/SKILL.md agents/pr-planner.md rules/autopilot.mdc; do
+  git check-ignore -q "$p" && { echo "FAIL: $p unexpectedly ignored"; exit 1; }
+done
+
+# Contract smoke (model slug + phase tokens)
+rg -n 'thinking-xhigh' skills agents rules && { echo 'FAIL: thinking-xhigh'; exit 1; } || true
+rg -n 'claude-fable-5-thinking-max' skills agents rules \
+  && { echo 'FAIL: use thinking-high only'; exit 1; } || true
+# Live ship phases must use enum tokens (underscores), not hyphens
+rg -n 'phase: (plan-review|create-ticket|babysit_opt)\b' skills/ship/SKILL.md \
+  && { echo 'FAIL: hyphenated/legacy live phase token'; exit 1; } || true
 ```
 
 ### Skill / agent coupling
