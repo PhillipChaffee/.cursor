@@ -103,6 +103,9 @@ product goal → do not declare Phase 1 complete.
 
 - **plan-gated / continue-after-plan / interactive**: wait until the user declares the
   architecture aligned (or equivalent), or gives feedback / answers clarifying questions.
+  If the user refuses, abandons, or otherwise cannot align, set
+  `stop_reason: phase1_alignment_unreachable` and hard-stop — do **not** set
+  `phase1_aligned` or enter Phase 2 (ship maps this to impossible-progress).
 - **fully-autonomous**: run Phase 1 once; do not wait. If the Phase 1 verdict is
   **Questions Only** or the product goal is still unclear, set `stop_reason` and hard-stop —
   do **not** set `phase1_aligned` or enter Phase 2. Otherwise set
