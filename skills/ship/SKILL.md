@@ -54,7 +54,7 @@ Thin phase state machine that takes Linear ENG work from intake (or optional tic
 |------|-----------------------------------|----------------------|----------|
 | `plan-gated` | residual ack → clean-plan → **wait for user plan approve** → implement | ticket-draft approve (problem path), Phase 1 alignment gates, plan approve, residual ack, Category A / open questions | impossible-progress + human-gate matrices |
 | `continue-after-plan` | residual ack → clean-plan → implement (no plan-approve wait) | ticket-draft approve (problem path), Phase 1 alignment gates, residual ack, Category A / open questions | same |
-| `fully-autonomous` | auto `plan_ack` / skippable Category A waivers (`acker: fully-autonomous`) → implement with no human waits | none after bootstrap (auto-creates ticket on problem path; Phase 1 auto-acks once) | impossible-progress only |
+| `fully-autonomous` | auto `plan_ack` / skippable Category A waivers (`acker: fully-autonomous`) → implement with no human waits | none after bootstrap (auto-creates ticket on problem path; Phase 1 auto-acks only when not Questions Only / unclear goal) | impossible-progress only |
 
 Recommend `plan-gated` for normal work. Other modes opt-in. `fully-autonomous` never auto-merges.
 
@@ -71,7 +71,7 @@ Hard-stop when any hold:
 - Plan draft would invent AC beyond the ticket
 - Looping-plan-review **Questions Only**
 - Looping-plan-review Phase 2 **anti-stall** / budget deadlock (`fully-autonomous`: abort with `stop_reason`; other modes escalate to human). Phase 2 loops tactical fixes until Approve — do not stop after a single auto-fix.
-- Looping-plan-review Phase 1 alignment unreachable (non-FA: user cannot or will not align; FA: treat as impossible-progress only if the single architecture pass cannot produce a usable plan)
+- Looping-plan-review Phase 1 alignment unreachable (non-FA: user cannot or will not align; FA: Questions Only or unclear product goal after the single architecture pass — never substitute “usable plan” for alignment)
 - Dirty repo needing user at bootstrap
 - Linear team cannot be resolved (`list_teams` ambiguous and no `team` input)
 - GitLab `engineer_username` cannot be resolved (see [MR authorship](#mr-authorship)) or post-create author is a bot/mismatch
@@ -106,7 +106,7 @@ flowchart TD
   planDraft --> planReview["/looping-plan-review"]
   planReview --> p1["Phase 1 architecture alignment"]
   p1 -->|feedback| p1
-  p1 -->|"user aligned or FA auto-ack"| p2["Phase 2 implementation convergence"]
+  p1 -->|"user aligned or FA auto-ack (not Questions Only / unclear goal)"| p2["Phase 2 implementation convergence"]
   p2 -->|"triage + implementer"| p2
   planReview -->|QuestionsOnly| stopAsk
   planReview -->|antiStall| stopAsk
@@ -144,7 +144,7 @@ For every child-backed phase: **read and execute** the linked `SKILL.md` (or rul
 | `intake` | `get_issue` + `list_issue_statuses` | [`.cursor/rules/linear-tickets/RULE.mdc`](../../rules/linear-tickets/RULE.mdc) | AC checklist; not blocked-by; not terminal; not oversized | intake gate fails |
 | `research` | `/deep-research` (main agent) | [`.cursor/skills/deep-research/SKILL.md`](../deep-research/SKILL.md) | synthesis returned; `fully-autonomous` may continue with logged assumptions | blocking open questions (non-autonomous) |
 | `plan_draft` | `.cursor/plans/<TICKET>.plan.md` | [`.cursor/rules/plan-steps/RULE.mdc`](../../rules/plan-steps/RULE.mdc) | plan has plan-steps todos | would invent AC beyond ticket |
-| `plan_review` | `/looping-plan-review` (main agent; invokes `/plan-review`) | [`.cursor/skills/looping-plan-review/SKILL.md`](../looping-plan-review/SKILL.md) | Phase 2 **Approve** + zero blockers | Questions Only; Phase 2 anti-stall; Phase 1 alignment unreachable (non-FA) |
+| `plan_review` | `/looping-plan-review` (main agent; invokes `/plan-review`) | [`.cursor/skills/looping-plan-review/SKILL.md`](../looping-plan-review/SKILL.md) | Phase 2 **Approve** + zero blockers | Questions Only; unclear product goal (FA Phase 1); Phase 2 anti-stall; Phase 1 alignment unreachable (non-FA) |
 | `residual_ack` | — (orchestrator-native) | run-state | no suggestions; human `plan_ack`; or autonomous auto `plan_ack` | suggestions without ack (non-autonomous) |
 | `plan_clean` | `/clean-plan` | [`.cursor/skills/clean-plan/SKILL.md`](../clean-plan/SKILL.md) | cleaned; Category A resolved | blocking Category A / unanswerable open questions |
 | `mode_gate` | — (orchestrator-native) | run-state | per Modes table | waiting on user (non-autonomous) |
@@ -274,7 +274,7 @@ owned_commits: []
 mr_urls: []
 mr_records: []  # {repo, source_branch, target_branch, ticket, url, draft, author}
 extra_verify_results: []
-autopilot_path: autopilot | cloud_handoff | gitlab_watch_non_autopilot | skipped
+autopilot_path: autopilot | cloud_handoff | gitlab_watch_non_autopilot | skipped | legacy_babysit
 
 **Legacy resume normalization.** If an older run-state uses `babysit_opt` /
 `babysit_path`, map them to `autopilot_opt` / `autopilot_path` before continuing.

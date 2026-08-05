@@ -78,7 +78,7 @@ Phase 1 iteration N:
 - [ ] Step 1: Run plan-review in review-only + architecture-alignment mode
 - [ ] Step 2: Present alignment proposal (placement, naming, product goal, system fit)
 - [ ] Step 3: Human gate — aligned? / feedback? / clarify product goal?
-- [ ] Step 4: Apply feedback to the plan (or exit Phase 1)
+- [ ] Step 4: Apply feedback and loop to Step 1, or encode alignment and exit Phase 1
 ```
 
 ### Step 1: Architecture-focused review
@@ -109,11 +109,14 @@ product goal → do not declare Phase 1 complete.
   `phase1_aligned: {at, acker: fully-autonomous}` in run-state / `decisions[]` and continue
   to Phase 2.
 
-### Step 4: Encode outcomes
+### Step 4: Apply feedback or encode outcomes
 
-Before exiting Phase 1, ensure alignment decisions are written into the plan as **executable
-Design/Changes constraints** (concrete paths, names, diagrams) — not “why we decided” prose
-(`clean-plan` strips rationale). Then enter Phase 2.
+- **Feedback / clarifying answers** (interactive modes): apply the edits to the plan, then
+  **return to Step 1** for another architecture-alignment pass. Do **not** enter Phase 2 until
+  the user declares aligned (or FA auto-ack is allowed under Step 3).
+- **Aligned** (user declared, or FA set `phase1_aligned` under Step 3): write alignment
+  decisions into the plan as **executable Design/Changes constraints** (concrete paths, names,
+  diagrams) — not “why we decided” prose (`clean-plan` strips rationale). Then enter Phase 2.
 
 Track `looping_plan_iterations.phase1`.
 
@@ -140,8 +143,9 @@ Always re-run the full planned review after every plan edit.
 
 Phase 2 is **done** when ALL hold:
 
-- Curated verdict is **Approve** (or equivalent: zero confirmed blockers).
-- Every remaining confirmed finding is a **nit** or **explicitly deferred**.
+- Curated verdict is **Approve** with **zero confirmed blockers**.
+- Every remaining confirmed finding is a **nit** or an **explicitly deferred non-blocker**
+  (deferred blockers do not satisfy exit — fix-now, escalate, or abort).
 - Plan length is within `growth_ceiling` (or user approved an exception).
 - Latest plan-structure check passed.
 
@@ -177,8 +181,9 @@ Do not fold in deferred findings or opportunistic improvements.
 On `STRATEGIC_ESCALATION`:
 
 - **Non-FA**: pause for the user; do not silently rewrite approach/architecture.
-- **FA**: if the implementer (or finding Fix) includes a recommended resolution, adopt it and
-  log in `decisions[]`; otherwise hard-stop as impossible-progress.
+- **FA**: hard-stop as impossible-progress (`stop_reason: STRATEGIC_ESCALATION`). Do **not**
+  auto-adopt approach/architecture changes in Phase 2 — that requires re-entering Phase 1 with
+  a human (or a fresh FA Phase 1 after the user changes mode/scope).
 
 Recalculate plan length against `growth_ceiling` before committing. Shrink or defer if over
 budget unless the user approved the named blocker.
