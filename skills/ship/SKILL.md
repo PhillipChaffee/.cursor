@@ -71,10 +71,11 @@ Hard-stop when any hold:
 - Plan draft would invent AC beyond the ticket
 - Looping-plan-review impossible-progress stops owned by
   [`.cursor/skills/looping-plan-review/SKILL.md`](../looping-plan-review/SKILL.md): Phase 2
-  **Questions Only**; FA Phase 1 **Questions Only** / unclear product goal; Phase 2
+  **Questions Only**; FA Phase 1 **Questions Only** / unclear product goal; FA Phase 2
   **anti-stall** / budget deadlock; FA Phase 2 **STRATEGIC_ESCALATION**. Do not hard-stop
-  interactive Phase 1 Questions Only — that path clarifies and re-runs Phase 1. Phase 2
-  loops tactical fixes until Approve — do not stop after a single auto-fix.
+  interactive Phase 1 Questions Only — that path clarifies and re-runs Phase 1. Non-FA Phase 2
+  anti-stall stays a human-gate pause (see below). Phase 2 loops tactical fixes until Approve —
+  do not stop after a single auto-fix.
 - Looping-plan-review Phase 1 alignment unreachable (non-FA: user cannot or will not align)
 - Dirty repo needing user at bootstrap
 - Linear team cannot be resolved (`list_teams` ambiguous and no `team` input)
@@ -151,7 +152,7 @@ For every child-backed phase: **read and execute** the linked `SKILL.md` (or rul
 | `intake` | `get_issue` + `list_issue_statuses` | [`.cursor/rules/linear-tickets/RULE.mdc`](../../rules/linear-tickets/RULE.mdc) | AC checklist; not blocked-by; not terminal; not oversized | intake gate fails |
 | `research` | `/deep-research` (main agent) | [`.cursor/skills/deep-research/SKILL.md`](../deep-research/SKILL.md) | synthesis returned; `fully-autonomous` may continue with logged assumptions | blocking open questions (non-autonomous) |
 | `plan_draft` | `.cursor/plans/<TICKET>.plan.md` | [`.cursor/rules/plan-steps/RULE.mdc`](../../rules/plan-steps/RULE.mdc) | plan has plan-steps todos | would invent AC beyond ticket |
-| `plan_review` | `/looping-plan-review` (main agent; invokes `/plan-review`) | [`.cursor/skills/looping-plan-review/SKILL.md`](../looping-plan-review/SKILL.md) | Phase 2 **Approve** + zero blockers; `phase1_aligned` set | Phase 2 Questions Only; FA Phase 1 Questions Only / unclear goal; Phase 2 anti-stall; FA STRATEGIC_ESCALATION; Phase 1 alignment unreachable (non-FA) |
+| `plan_review` | `/looping-plan-review` (main agent; invokes `/plan-review`) | [`.cursor/skills/looping-plan-review/SKILL.md`](../looping-plan-review/SKILL.md) | Phase 2 **Approve** + zero blockers; `phase1_aligned` set | Phase 2 Questions Only; FA Phase 1 Questions Only / unclear goal; FA Phase 2 anti-stall; FA STRATEGIC_ESCALATION; Phase 1 alignment unreachable (non-FA) |
 | `residual_ack` | — (orchestrator-native) | run-state | `phase1_aligned` set; no suggestions; human `plan_ack`; or autonomous auto `plan_ack` | `phase1_aligned` missing (re-enter `/looping-plan-review` Phase 1); suggestions without ack (non-autonomous) |
 | `plan_clean` | `/clean-plan` | [`.cursor/skills/clean-plan/SKILL.md`](../clean-plan/SKILL.md) | cleaned; Category A resolved | blocking Category A / unanswerable open questions |
 | `mode_gate` | — (orchestrator-native) | run-state | per Modes table | waiting on user (non-autonomous) |

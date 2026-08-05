@@ -114,9 +114,11 @@ product goal → do not declare Phase 1 complete.
 - **Feedback / clarifying answers** (interactive modes): apply the edits to the plan, then
   **return to Step 1** for another architecture-alignment pass. Do **not** enter Phase 2 until
   the user declares aligned (or FA auto-ack is allowed under Step 3).
-- **Aligned** (user declared, or FA set `phase1_aligned` under Step 3): write alignment
-  decisions into the plan as **executable Design/Changes constraints** (concrete paths, names,
-  diagrams) — not “why we decided” prose (`clean-plan` strips rationale). Then enter Phase 2.
+- **Aligned** (user declared, or FA set `phase1_aligned` under Step 3): if the user declared
+  aligned, set `phase1_aligned: {at, acker: user}` in run-state / `decisions[]` (FA already
+  wrote its acker in Step 3). Write alignment decisions into the plan as **executable
+  Design/Changes constraints** (concrete paths, names, diagrams) — not “why we decided” prose
+  (`clean-plan` strips rationale). Then enter Phase 2.
 
 Track `looping_plan_iterations.phase1`.
 
@@ -180,7 +182,9 @@ Do not fold in deferred findings or opportunistic improvements.
 
 On `STRATEGIC_ESCALATION`:
 
-- **Non-FA**: pause for the user; do not silently rewrite approach/architecture.
+- **Non-FA**: pause for the user; do not silently rewrite approach/architecture. If the
+  resolution changes approach/architecture, clear `phase1_aligned`, re-enter Phase 1, and
+  require a fresh alignment before Phase 2 continues.
 - **FA**: hard-stop as impossible-progress (`stop_reason: STRATEGIC_ESCALATION`). Do **not**
   auto-adopt approach/architecture changes in Phase 2 — that requires re-entering Phase 1 with
   a human (or a fresh FA Phase 1 after the user changes mode/scope).
