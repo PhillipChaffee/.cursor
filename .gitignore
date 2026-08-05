@@ -1,20 +1,62 @@
-# Ignore everything by default; un-ignore only what this repo versions.
-# Intentionally NOT listing excluded work/skill names — naming them in a
-# public file would itself leak internal tooling info. The repo lives in
-# its own folder, so anything we don't cp in simply isn't here.
+# >>> CURSOR MANAGED BLOCK >>>
+# Ignore everything in .cursor
 *
+# Un-ignore projects so we can descend to allowlisted subdirs
+!projects/
+projects/*
+!projects/*/
+projects/*/*
+# MCP tool descriptors, resources, prompts
+!projects/*/mcps/
+!projects/*/mcps/**
+# Agent transcripts for citation
+!projects/*/agent-transcripts/
+!projects/*/agent-transcripts/**
+# Terminal output files
+!projects/*/terminals/
+!projects/*/terminals/**
+# Conversation notes (shared scratchpad)
+!projects/*/agent-notes/
+!projects/*/agent-notes/**
+# Large tool output files
+!projects/*/agent-tools/
+!projects/*/agent-tools/**
+# Plugin cache (rules, skills, agents)
+!plugins/
+!plugins/**
+# Built-in Cursor skills
+!skills-cursor/
+!skills-cursor/**
+# User's personal skills
+!skills/
+!skills/**
+# User's personal slash commands
+!commands/
+!commands/**
+# User's plan files
+!plans/
+!plans/**
+# Subagent state/transcripts
+!subagents/
+!subagents/**
+# User-level cursor rules
+!rules/
+!rules/**
+# <<< CURSOR MANAGED BLOCK <<<
 
+# >>> PERSONAL REPO ALLOWLIST (must stay last) >>>
+# Re-ignore everything Cursor may un-ignore above, then track only this repo.
+*
 !.gitignore
 !README.md
 !LICENSE
-
 !skills/
 !skills/**
 !agents/
 !agents/**
 !rules/
 !rules/**
-
 **/.DS_Store
 **/__pycache__/
 **/*.pyc
+# <<< PERSONAL REPO ALLOWLIST <<<
