@@ -37,11 +37,13 @@ here (those can wipe Cursor app data).
 ```bash
 cd ~/.cursor
 
-# 1) Preserve any local kit customizations before first sync
-mkdir -p ~/.cursor-kit-backup
+# 1) Preserve any local kit customizations before first sync (timestamped; never overwrite)
+BACKUP="$HOME/.cursor-kit-backup-$(date +%Y%m%d-%H%M%S)"
+mkdir "$BACKUP"   # fails if path exists — do not reuse
 for item in skills agents rules; do
-  [ -e "$item" ] && cp -a "$item" ~/.cursor-kit-backup/
+  [ -e "$item" ] && cp -a "$item" "$BACKUP/"
 done
+echo "Backup written to $BACKUP"
 
 # 2) Attach remote without destroying untracked app data
 git init
@@ -49,7 +51,7 @@ git remote add origin https://github.com/PhillipChaffee/.cursor.git 2>/dev/null 
   git remote set-url origin https://github.com/PhillipChaffee/.cursor.git
 git fetch origin
 git checkout -B main origin/main   # or: git checkout -B <branch> origin/<branch>
-# If checkout refuses because of local tracked conflicts, path-limited restore only:
+# If checkout refuses (usually untracked local skills/agents/rules), path-limited restore only:
 #   git checkout origin/main -- .gitignore README.md LICENSE skills agents rules
 
 # 3) Verify ignore allowlist (see Notes → Git safety)
@@ -225,8 +227,11 @@ only:
 **Always use path-limited staging** (`git add -- path…`). Never `git add .` or
 `git add -A`. Never `git clean` or `git reset --hard` here.
 
-**Recovery:** if a path-limited checkout went wrong, use `git reflog` and restore
-only allowlisted paths from a known-good SHA
+**Recovery:** if a path-limited checkout overwrote kit trees you still want,
+restore from the timestamped backup first
+(`cp -a "$BACKUP"/skills "$BACKUP"/agents "$BACKUP"/rules ~/.cursor/` —
+use the path printed in step 1). For git-only mistakes, use `git reflog` and
+restore allowlisted paths from a known-good SHA
 (`git checkout <sha> -- .gitignore README.md LICENSE skills agents rules`).
 Ignored Cursor app data is **not** in git — restore it from Time Machine / your
 OS backup if damaged.
@@ -236,8 +241,28 @@ allowlist still appears **after** the managed block and still wins. From this
 directory:
 
 ```bash
+set -euo pipefail
+
+assert_no_matches() {
+  # rg: 0=matches (fail), 1=clean, 2+=tool error (fail)
+  local pattern=$1; shift
+  set +e
+  rg -n -- "$pattern" "$@"
+  local st=$?
+  set -e
+  if [ "$st" -eq 0 ]; then
+    echo "FAIL: forbidden pattern: $pattern"
+    exit 1
+  fi
+  if [ "$st" -ne 1 ]; then
+    echo "FAIL: rg error ($st) for: $pattern"
+    exit 1
+  fi
+}
+
 # Sensitive / managed paths must stay ignored
-git check-ignore -v --no-index mcp.json
+git check-ignore -q --no-index mcp.json \
+  || { echo 'FAIL: mcp.json should be ignored'; exit 1; }
 git check-ignore -q --no-index projects/example/mcps/x.json \
   || { echo 'FAIL: projects mcps should be ignored'; exit 1; }
 git check-ignore -q --no-index projects/example/agent-transcripts/x.jsonl \
@@ -247,18 +272,20 @@ git check-ignore -q --no-index plugins/cache/x \
 git check-ignore -q --no-index skills-cursor/x \
   || { echo 'FAIL: skills-cursor should be ignored'; exit 1; }
 
-# Kit roots must stay trackable
+# Kit roots must stay trackable (use --no-index so tracked files aren't a false pass)
 for p in README.md skills/ship/SKILL.md agents/pr-planner.md rules/autopilot.mdc; do
-  git check-ignore -q "$p" && { echo "FAIL: $p unexpectedly ignored"; exit 1; }
+  git check-ignore -q --no-index "$p" \
+    && { echo "FAIL: $p unexpectedly ignored"; exit 1; }
 done
 
 # Contract smoke (model slug + phase tokens)
-rg -n 'thinking-xhigh' skills agents rules && { echo 'FAIL: thinking-xhigh'; exit 1; } || true
-rg -n 'claude-fable-5-thinking-max' skills agents rules \
-  && { echo 'FAIL: use thinking-high only'; exit 1; } || true
-# Live ship phases must use enum tokens (underscores), not hyphens
-rg -n 'phase: (plan-review|create-ticket|babysit_opt)\b' skills/ship/SKILL.md \
-  && { echo 'FAIL: hyphenated/legacy live phase token'; exit 1; } || true
+assert_no_matches 'thinking-xhigh' skills agents rules
+assert_no_matches 'claude-fable-5-thinking-max' skills agents rules
+# Hyphenated / legacy tokens must not appear as live skip_phases or phase: values
+assert_no_matches 'skip_phases.*(plan-review|create-ticket|babysit_opt)' skills/ship/SKILL.md
+assert_no_matches 'phase: (plan-review|create-ticket|babysit_opt)\b' skills/ship/SKILL.md
+
+echo 'Git safety + contract smoke OK'
 ```
 
 ### Skill / agent coupling
