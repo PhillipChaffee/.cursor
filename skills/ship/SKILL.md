@@ -4,7 +4,7 @@ description: >-
   Orchestrate Linear ENG work from an existing ticket or a Slack/problem paste
   (optional ticket create) through research, plan, implement, verify, and GitLab
   MRs. Modes are plan-gated, continue-after-plan, or fully-autonomous. Optional
-  external /babysit handoff.
+  external /autopilot handoff.
 ---
 
 # Ship
@@ -34,27 +34,27 @@ Thin phase state machine that takes Linear ENG work from intake (or optional tic
 
 **Main agent only** reads and executes each child `SKILL.md` — meaning this orchestrator must not wrap a child skill invocation inside a `Task`/subagent of its own.
 
-**Allowed (required):** when a child `SKILL.md` itself says to launch subagents (e.g. `/plan-review`’s five reviewers + verifier, `/deep-research` Tier 2/3 collectors), the **main agent running that child skill** must follow that child SOP fully — including its Task fan-out when `Task` is available. Do **not** replace `/plan-review` or `/deep-research` with an abbreviated single-pass self-review.
+**Allowed (required):** when a child `SKILL.md` itself says to launch subagents (e.g. `/looping-plan-review` → `/plan-review`’s planner + reviewers + verifier, `/deep-research` Tier 2/3 collectors), the **main agent running that child skill** must follow that child SOP fully — including its Task fan-out when `Task` is available. Do **not** replace `/looping-plan-review`, `/plan-review`, or `/deep-research` with an abbreviated single-pass self-review.
 
 **If Task is unavailable** (nested subagent / toolset without `Task`):
 
-1. **Prefer sequential role-artifact fallback** for `/plan-review`: read each file under `.cursor/agents/` and run **only** these six roles, in order — `pr-problem-scope`, `pr-feasibility`, `pr-risk-rollback`, `pr-completeness`, `pr-adversarial`, then `pr-verifier`. Do **not** run `pr-implementer`, `pr-architecture`, `pr-simplification`, or any other `pr-*.md`. Write **distinct** artifacts under `.cursor/plans/<TICKET>.plan-review-fanout/` (one file per role) plus a synthesis `.cursor/plans/<TICKET>.plan-review.md`. Same output contracts as parallel Task fan-out. Record `plan_review_method: sequential_role_artifacts` in run-state. `/plan-review` documents the same fallback — use it; do not hard-stop merely because Task is missing.
+1. **Prefer sequential role-artifact fallback** for `/plan-review` (invoked by `/looping-plan-review` or standalone): follow the **When Task is unavailable** section in [`.cursor/skills/plan-review/SKILL.md`](../plan-review/SKILL.md) as the single source of truth for the role list and artifact paths. Do **not** hardcode a divergent role list in this file. Record `plan_review_method: sequential_role_artifacts` in run-state. Do not hard-stop merely because Task is missing.
 2. For `/deep-research`, **force Tier 1 synthesis** on this agent when collectors cannot be launched — do not follow deep-research triage into Tier 2/3, and do not invent collector or research-planner results.
-3. **Hard-stop** with `last_error: task_tool_unavailable` only when the child SOP cannot be satisfied even via sequential role artifacts (missing the six agent files above, cannot produce per-role artifacts, or a child requires a non-substitutable Task type). Tell the user to resume on a main agent that can fan out.
+3. **Hard-stop** with `last_error: task_tool_unavailable` only when the child SOP cannot be satisfied even via sequential role artifacts (missing required agent files, cannot produce per-role artifacts, or a child requires a non-substitutable Task type). Tell the user to resume on a main agent that can fan out.
 4. **Never** invent a fake Approve / synthesis without the per-role artifacts above.
 
-**Forbidden:** `Task`-wrapping the *orchestrator’s call* to `/deep-research` or `/plan-review` (or any child) so a subagent “runs ship phases” or returns a fake gate-passed summary. Nested orchestrator-in-Task is out of scope for the *parent* wrapping ship; if you *are* that nested agent, still execute this skill with the sequential fallback rather than aborting the whole run early.
+**Forbidden:** `Task`-wrapping the *orchestrator’s call* to `/deep-research`, `/looping-plan-review`, or `/plan-review` (or any child) so a subagent “runs ship phases” or returns a fake gate-passed summary. Nested orchestrator-in-Task is out of scope for the *parent* wrapping ship; if you *are* that nested agent, still execute this skill with the sequential fallback rather than aborting the whole run early.
 
 **Trusted child skills (only these may be read/executed by this orchestrator):**
-`deep-research`, `plan-review`, `clean-plan`, `ci-lint-test`, `pre-mr-checklist`, `looping-code-review`, plus `extra_verify` allowlist entries above. Reject any other skill name.
+`deep-research`, `looping-plan-review`, `plan-review`, `clean-plan`, `ci-lint-test`, `pre-mr-checklist`, `looping-code-review`, plus `extra_verify` allowlist entries above. Reject any other skill name.
 
 ## Modes
 
-| Mode | After plan-review Approve | Human approval waits | Stops on |
-|------|---------------------------|----------------------|----------|
-| `plan-gated` | residual ack → clean-plan → **wait for user plan approve** → implement | ticket-draft approve (problem path), plan approve, residual ack, Category A / open questions | impossible-progress + human-gate matrices |
-| `continue-after-plan` | residual ack → clean-plan → implement (no plan-approve wait) | ticket-draft approve (problem path), residual ack, Category A / open questions | same |
-| `fully-autonomous` | auto `plan_ack` / skippable Category A waivers (`acker: fully-autonomous`) → implement with no human waits | none after bootstrap (auto-creates ticket on problem path) | impossible-progress only |
+| Mode | After looping-plan-review Approve | Human approval waits | Stops on |
+|------|-----------------------------------|----------------------|----------|
+| `plan-gated` | residual ack → clean-plan → **wait for user plan approve** → implement | ticket-draft approve (problem path), Phase 1 alignment gates, plan approve, residual ack, Category A / open questions | impossible-progress + human-gate matrices |
+| `continue-after-plan` | residual ack → clean-plan → implement (no plan-approve wait) | ticket-draft approve (problem path), Phase 1 alignment gates, residual ack, Category A / open questions | same |
+| `fully-autonomous` | auto `plan_ack` / skippable Category A waivers (`acker: fully-autonomous`) → implement with no human waits | none after bootstrap (auto-creates ticket on problem path; Phase 1 auto-acks once) | impossible-progress only |
 
 Recommend `plan-gated` for normal work. Other modes opt-in. `fully-autonomous` never auto-merges.
 
@@ -69,8 +69,9 @@ Hard-stop when any hold:
 - Problem path: cannot draft a title + at least one verifiable AC checklist item from the source text
 - Intake fails (missing AC checklist, blocked-by, terminal status, oversized ~>6 AC or multi-service epic)
 - Plan draft would invent AC beyond the ticket
-- Plan-review **Questions Only**
-- Plan-review **Request Changes** after one auto-fix+re-review fails (`fully-autonomous` gets exactly one auto-fix via plan-review implementer; other modes stop on first Request Changes)
+- Looping-plan-review **Questions Only**
+- Looping-plan-review Phase 2 **anti-stall** / budget deadlock (`fully-autonomous`: abort with `stop_reason`; other modes escalate to human). Phase 2 loops tactical fixes until Approve — do not stop after a single auto-fix.
+- Looping-plan-review Phase 1 alignment unreachable (non-FA: user cannot or will not align; FA: treat as impossible-progress only if the single architecture pass cannot produce a usable plan)
 - Dirty repo needing user at bootstrap
 - Linear team cannot be resolved (`list_teams` ambiguous and no `team` input)
 - GitLab `engineer_username` cannot be resolved (see [MR authorship](#mr-authorship)) or post-create author is a bot/mismatch
@@ -86,7 +87,8 @@ Hard-stop when any hold:
 - `plan-gated`: explicit cleaned-plan approve
 - Research blocking open questions → human answer (`fully-autonomous`: log assumptions in `decisions[]` and continue unless inventing AC beyond ticket)
 - Scope mismatch → human decide. `fully-autonomous`: only revert files/commits recorded in this run’s `owned_paths` / `owned_commits`; if ownership is unclear, stop (never revert unowned work)
-- Looping anti-stall / growth-budget → human decide (`fully-autonomous`: abort loop, keep MRs, record `stop_reason`; keep In Review if MRs exist)
+- Looping-plan-review Phase 1 alignment gate each iteration until user says aligned
+- Looping anti-stall / growth-budget (plan Phase 2 or post-MR code loop) → human decide (`fully-autonomous`: abort loop, keep MRs if any, record `stop_reason`; keep In Review if MRs exist)
 
 ## Phase sequence
 
@@ -101,12 +103,13 @@ flowchart TD
   intake -->|fail| stopAsk
   intake -->|ok| research["/deep-research with synthesis-only constraint"]
   research --> planDraft[Draft plan with plan-steps]
-  planDraft --> planReview["/plan-review"]
+  planDraft --> planReview["/looping-plan-review"]
+  planReview --> p1["Phase 1 architecture alignment"]
+  p1 -->|feedback| p1
+  p1 -->|"user aligned or FA auto-ack"| p2["Phase 2 implementation convergence"]
+  p2 -->|"triage + implementer"| p2
   planReview -->|QuestionsOnly| stopAsk
-  planReview -->|RequestChanges| autoFix{fully-autonomous and first attempt?}
-  autoFix -->|yes| fixOnce[Auto-fix plan once + re-review]
-  fixOnce --> planReview
-  autoFix -->|no| stopAsk
+  planReview -->|antiStall| stopAsk
   planReview -->|Approve| residualAck[plan_ack human or auto]
   residualAck --> cleanPlan["/clean-plan"]
   cleanPlan --> modeGate{mode}
@@ -120,15 +123,15 @@ flowchart TD
   verify --> mrs[Push + create per-repo MRs]
   mrs --> linearReview[Linear In Review + MR links]
   linearReview --> looping["/looping-code-review"]
-  looping --> babysitOpt["Optional babysit or handoff or non-babysit watch"]
-  babysitOpt --> done[Done: MRs open + In Review + path named]
+  looping --> autopilotOpt["Optional autopilot or handoff or non-autopilot watch"]
+  autopilotOpt --> done[Done: MRs open + In Review + path named]
 ```
 
 ## Phase enum
 
 Use these exact `phase` values in run-state:
 
-`bootstrap` | `create_ticket` | `intake` | `research` | `plan_draft` | `plan_review` | `residual_ack` | `plan_clean` | `mode_gate` | `linear_in_progress` | `implement` | `scope_gate` | `verify` | `open_mrs` | `linear_in_review` | `looping_review` | `babysit_opt` | `done` | `aborted`
+`bootstrap` | `create_ticket` | `intake` | `research` | `plan_draft` | `plan_review` | `residual_ack` | `plan_clean` | `mode_gate` | `linear_in_progress` | `implement` | `scope_gate` | `verify` | `open_mrs` | `linear_in_review` | `looping_review` | `autopilot_opt` | `done` | `aborted`
 
 ## Per-phase contract
 
@@ -141,7 +144,7 @@ For every child-backed phase: **read and execute** the linked `SKILL.md` (or rul
 | `intake` | `get_issue` + `list_issue_statuses` | [`.cursor/rules/linear-tickets/RULE.mdc`](../../rules/linear-tickets/RULE.mdc) | AC checklist; not blocked-by; not terminal; not oversized | intake gate fails |
 | `research` | `/deep-research` (main agent) | [`.cursor/skills/deep-research/SKILL.md`](../deep-research/SKILL.md) | synthesis returned; `fully-autonomous` may continue with logged assumptions | blocking open questions (non-autonomous) |
 | `plan_draft` | `.cursor/plans/<TICKET>.plan.md` | [`.cursor/rules/plan-steps/RULE.mdc`](../../rules/plan-steps/RULE.mdc) | plan has plan-steps todos | would invent AC beyond ticket |
-| `plan_review` | `/plan-review` (main agent) | [`.cursor/skills/plan-review/SKILL.md`](../plan-review/SKILL.md) | **Approve** | Questions Only; Request Changes (unless autonomous first auto-fix) |
+| `plan_review` | `/looping-plan-review` (main agent; invokes `/plan-review`) | [`.cursor/skills/looping-plan-review/SKILL.md`](../looping-plan-review/SKILL.md) | Phase 2 **Approve** + zero blockers | Questions Only; Phase 2 anti-stall; Phase 1 alignment unreachable (non-FA) |
 | `residual_ack` | — (orchestrator-native) | run-state | no suggestions; human `plan_ack`; or autonomous auto `plan_ack` | suggestions without ack (non-autonomous) |
 | `plan_clean` | `/clean-plan` | [`.cursor/skills/clean-plan/SKILL.md`](../clean-plan/SKILL.md) | cleaned; Category A resolved | blocking Category A / unanswerable open questions |
 | `mode_gate` | — (orchestrator-native) | run-state | per Modes table | waiting on user (non-autonomous) |
@@ -152,7 +155,7 @@ For every child-backed phase: **read and execute** the linked `SKILL.md` (or rul
 | `open_mrs` | `git push` + GitLab MCP `create_merge_request` | [`.cursor/rules/merge-requests/RULE.mdc`](../../rules/merge-requests/RULE.mdc), configure a GitLab MCP exposing `create_merge_request` + `get_merge_request` | `engineer_username` already in run-state; push each source branch first; create as **draft** (see [MR authorship](#mr-authorship)); assign initiating engineer when known; target each repo’s **default branch** (resolve via remote HEAD / project default — do not assume every repo uses `main`) unless stacking target is in `decisions[]`; idempotency via structured `mr_records`; on existing match re-check draft/author before skip | identity unresolved / post-create bot or author mismatch / create fail / push fail |
 | `linear_in_review` | `save_issue` + links | — | status + MR links set | status resolve fail |
 | `looping_review` | `/looping-code-review` | [`.cursor/skills/looping-code-review/SKILL.md`](../looping-code-review/SKILL.md) | zero true blockers | anti-stall / budget |
-| `babysit_opt` | `/babysit` → Cloud handoff → non-babysit GitLab watch | babysit is **external/personal** (not in the trusted skill allowlist); invoke only if that skill is present in the agent environment, else fall through | `babysit_path` recorded; autonomous picks without asking | — |
+| `autopilot_opt` | `/autopilot` → Cloud handoff → non-autopilot GitLab watch | autopilot is **external/personal** (not in the trusted skill allowlist); invoke only if that skill is present in the agent environment, else fall through | `autopilot_path` recorded; autonomous picks without asking | — |
 
 ### Implement vs verify / open_mrs (no duplicates)
 
@@ -190,7 +193,7 @@ Neither Cursor’s built-in GitLab MCP nor zereight exposes a reliable `whoami` 
 1. Explicit input (e.g. `engineer_username=your-username`) — prefer this.
 2. Else Cursor Cloud `cursor-cloud` / `run-info` → `owningUserEmail` / `owningUserName`, then map to a GitLab username:
    - Prefer GitLab MCP `search` with `scope=users`. Search the **display name** first (e.g. `Phillip Chaffee`), then an exact known username. Do **not** search only the email local-part (`phillip`) — GitLab returns many unrelated `phillip*` users.
-   - Confirm the match: returned `name` should equal `owningUserName` (or email matches when present). If **multiple** hits share that display name, do not guess — use the known-owner table below or ask. Persist the chosen `username`.
+   - Confirm the match: returned `name` should equal `owningUserName` (or email matches when present). If **multiple** hits share that display name, do not guess — ask. Persist the chosen `username`.
 3. Else ask the user (all modes except `fully-autonomous`).
 4. `fully-autonomous` with no resolvable username → hard-stop with `last_error: engineer_username_unresolved` (do not implement hoping identity appears later).
 
@@ -215,19 +218,19 @@ Persist `engineer_username` in run-state as soon as known.
 9. Assign the initiating engineer when the create API supports `assignee_ids`; missing assignee is a warning in run-state, not a hard-stop.
 10. Append a structured `mr_records[]` entry `{repo, source_branch, target_branch, ticket, url, draft, author}` and mirror the URL into `mr_urls`.
 
-### Babysit (optional, external)
+### Autopilot (optional, external)
 
 Ordered path only:
 
-1. Invoke `/babysit` if present
+1. Invoke `/autopilot` if present
 2. Else Cloud handoff prompt with MR URLs
-3. Else read-only GitLab MCP watch labeled **non-babysit**
+3. Else read-only GitLab MCP watch labeled **non-autopilot**
 
-Wrap-up must state which path ran. Path (3) must **not** claim merge-ready or full babysit coverage. In `fully-autonomous`, pick the path without asking.
+Wrap-up must state which path ran. Path (3) must **not** claim merge-ready or full autopilot coverage. In `fully-autonomous`, pick the path without asking.
 
 ### Happy-path done
 
-Per-repo MRs open; Linear `In Review` with MR links; run-state complete; `babysit_path` named. **Not** merged.
+Per-repo MRs open; Linear `In Review` with MR links; run-state complete; `autopilot_path` named. **Not** merged.
 
 ## Durable run state
 
@@ -259,16 +262,19 @@ ticket_url: ...
 engineer_username: null | "your-username"
 plan_path: ...
 plan_review_verdict: Approve | ...
+phase1_aligned: null | { at, acker }  # acker: user | fully-autonomous
+looping_plan_iterations: { phase1: 0, phase2: 0 }
+plan_baseline_lines: null | <int>
 plan_ack: null | { suggestion_ids, acker, at }
 category_a_waivers: []
 decisions: []
-auto_fix_cycles: 0
+auto_fix_cycles: 0  # legacy; plan review uses looping_plan_iterations instead
 owned_paths: []
 owned_commits: []
 mr_urls: []
 mr_records: []  # {repo, source_branch, target_branch, ticket, url, draft, author}
 extra_verify_results: []
-babysit_path: babysit | cloud_handoff | gitlab_watch_non_babysit | skipped
+autopilot_path: autopilot | cloud_handoff | gitlab_watch_non_autopilot | skipped
 linear_status_writes: []
 stop_reason: null
 last_error: null
@@ -283,10 +289,10 @@ resume: continue /ship --run .cursor/plans/<TICKET_OR_PENDING>.run.md from phase
 - No inventing AC beyond the ticket (create path drafts AC from redacted source — that is allowed)
 - No pointer/meta commits across repos unless asked
 - No launch-check
-- No vendoring `/babysit` into this workspace kit
+- No vendoring `/autopilot` into this workspace kit
 - No deleting Linear tickets on abort
 - No executing child skills outside the trusted allowlist
 
 ## Wrap-up
 
-Print: ticket (and whether created this run), mode, plan path, run-state path, MR URLs, Linear status, `babysit_path`, remaining human steps (merge, Done).
+Print: ticket (and whether created this run), mode, plan path, run-state path, MR URLs, Linear status, `autopilot_path`, remaining human steps (merge, Done).

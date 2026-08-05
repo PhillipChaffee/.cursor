@@ -57,15 +57,44 @@ Move to top of file.
 
 If the project uses a feature-flag provider, and the change uses `is_feature_enabled`,
 `is_feature_gate_enabled`, `is_feature_enabled_for_account`, `check_gate`, `get_experiment`,
-or similar feature management calls, verify for each gate/experiment found:
+or similar feature management calls, run the four steps below for each gate/experiment found.
 
-1. Extract the gate/experiment name and understand the gated on vs off behavior.
-2. Propose success, guardrail, and operational metrics needed to evaluate the change.
-3. Confirm in your feature-flag provider (or via its API/CLI if available) that the
-   gate/experiment exists and that those metrics are attached or can be created from
-   events the code already logs.
-4. If provider tooling is unavailable, report the proposed metrics and note that provider
-   verification was skipped.
+#### Step 2a: Extract gate/experiment names and understand the gated behavior
+
+- Extract the gate/experiment name (the string argument to the call).
+- Read both branches of the conditional (gate on vs gate off) to understand what behavior is
+  being changed.
+- Note the surrounding context: what service, what user-facing flow, what data is affected.
+
+#### Step 2b: Reason about what metrics SHOULD exist
+
+Based on the gated behavior, propose metrics needed to evaluate whether the gate/experiment is
+successful. Consider three categories:
+
+- **Success metrics**: What should improve if the gate works?
+- **Guardrail metrics**: What should NOT get worse? (e.g., error rate, latency, drop-off)
+- **Operational metrics**: What would help debug issues? (e.g., gate evaluation count)
+
+For each proposed metric, note the name, what it measures, what underlying event would power
+it, and whether the code already logs that event.
+
+#### Step 2c: Verify in your feature-flag provider
+
+Prefer whatever read-only tooling that provider already exposes in your environment (MCP, CLI,
+or API). Confirm the gate/experiment exists and that the proposed metrics are attached or can
+be created from events the code already logs.
+
+If provider tooling is unavailable, skip provider verification and report only the proposed
+metrics with a note that verification was skipped.
+
+#### Step 2d: Produce a metrics report
+
+For each gate/experiment, separate:
+
+- What already exists and is properly configured
+- What exists in the provider but needs to be attached
+- What needs to be created (and from which logged events)
+- Whether underlying events are already logged in code
 
 ### 3. New env vars added to Helm values
 
