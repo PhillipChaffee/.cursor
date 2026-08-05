@@ -113,12 +113,14 @@ flowchart TD
   planReview --> p1["Phase 1 architecture alignment"]
   p1 -->|feedback| p1
   p1 -->|"user aligned or FA auto-ack (not Questions Only / unclear goal)"| p2["Phase 2 implementation convergence"]
+  p1 -->|"alignment unreachable (non-FA)"| stopAsk
   p2 -->|"triage + implementer"| p2
   p1 -->|"FA QuestionsOnly / unclear goal"| stopAsk
   p2 -->|QuestionsOnly| stopAsk
   p2 -->|"antiStall / strategicEscalation (FA)"| stopAsk
   p2 -->|"antiStall / strategicEscalation (non-FA)"| humanGatePause[Human gate pause]
-  humanGatePause -->|resume after decide| p2
+  humanGatePause -->|"resume: tactical / anti-stall"| p2
+  humanGatePause -->|"resume: architecture changed"| p1
   p2 -->|Approve| residualAck[plan_ack human or auto]
   residualAck --> cleanPlan["/clean-plan"]
   cleanPlan --> modeGate{mode}
