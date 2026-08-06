@@ -1,11 +1,11 @@
 ---
-description: Constrain /babysit with a size budget and minimal-change triage.
+description: Constrain /autopilot with a size budget and minimal-change triage.
 alwaysApply: true
 ---
 
-# Babysit
+# Autopilot
 
-When running the `babysit` skill (`/babysit`), or when `/ship` hands off to babysit, apply this discipline on top of the built-in skill. Do not vendor or edit the Cursor-managed babysit skill.
+When running the `autopilot` skill (`/autopilot`), or when `/ship` hands off to autopilot, apply this discipline on top of the built-in skill. Do not vendor or edit the Cursor-managed autopilot skill.
 
 ## Goal
 
@@ -13,7 +13,7 @@ Get the PR merge-ready (conflicts, valid comments/Bugbot, in-scope CI) **without
 
 ## Size budget
 
-Record once at babysit start; never reset for the run:
+Record once at autopilot start; never reset for the run:
 
 ```
 baseline_changed_lines = insertions + deletions (PR vs target)
@@ -33,7 +33,7 @@ Also track net code growth:
 
 ## Scope
 
-**Implement during babysit only:**
+**Implement during autopilot only:**
 
 - Merge conflicts (preserve branch + base intent; if intents conflict, abort and ask)
 - Items triage marks `fix-now` (comments, Bugbot, in-scope CI)
@@ -44,7 +44,7 @@ Also track net code growth:
 - Style nits that match Google style / existing style rules (e.g. `python-docstrings-google`, `comment-style`, `python` line length and imports)
 - Preference comments that are a **good opinion** — infer from active rules and skills (`minimal-changes`, `engineering`, `code-organization`, Naming, Subagent Use, etc.). Weak taste with no backing rule → `reject` or `nit-skip`
 
-**Restructure / “could be faster” / broad architecture** can be real and worth doing, but **not inside babysit**. Use `pause-plan`: stop the loop, surface the finding, wait for the user to plan. Do not silently redesign under merge-ready pressure.
+**Restructure / “could be faster” / broad architecture** can be real and worth doing, but **not inside autopilot**. Use `pause-plan`: stop the loop, surface the finding, wait for the user to plan. Do not silently redesign under merge-ready pressure.
 
 **Reject:** invalid Bugbot, CI-workflow hacks, unrelated code, preferences unsupported by rules/skills, style that conflicts with project/Google rules.
 
@@ -61,7 +61,7 @@ Before implementing any comment, Bugbot, or CI fix (pure intent-preserving confl
 | Decision | Meaning |
 |----------|---------|
 | `fix-now` | Correctness, in-scope CI, Google-aligned style, or good-opinion preference; include optimal minimal change set |
-| `pause-plan` | Real restructure / perf / architecture — pause babysit and ask the user to plan; do not implement in this loop |
+| `pause-plan` | Real restructure / perf / architecture — pause autopilot and ask the user to plan; do not implement in this loop |
 | `defer` | Real but not merge-blocking and not worth pausing for (follow-up later) |
 | `nit-skip` | Tiny / not worth a commit this pass (may batch with another `fix-now` on the same file) |
 | `reject` | Invalid, out of scope, or preference/style that conflicts with rules |

@@ -7,7 +7,7 @@ description: Iteratively run the multi-agent code review, apply only the smalles
 
 Drive an MR branch to "ready" by repeating a tight loop: run the planned multi-agent `code-review` skill, have a triage subagent pick the smallest safe fixes from the latest findings, implement only those fixes, run focused tests and CI-style checks, commit and push to the current branch, then re-review. The goal is to resolve blockers without making the MR harder to review: hold or reduce its size whenever possible, prefer deletion or replacement over new abstractions, and enforce the growth budget below. Exit only when the verifier reports no true blockers and every remaining finding is a nit or an explicitly deferred follow-up.
 
-This skill orchestrates; the underlying review mechanics live in `.cursor/skills/code-review/SKILL.md` (reviewers, verifier, output format) and the local CI mechanics live in `.cursor/skills/ci-lint-test/SKILL.md`.
+This skill orchestrates; the underlying review mechanics live in `.cursor/skills/code-review/SKILL.md` (reviewers, verifier, output format) and the local CI mechanics live in `.cursor/skills/ci-lint-test/SKILL.md`. The plan-side analogue is `/looping-plan-review`.
 
 ## When to use
 

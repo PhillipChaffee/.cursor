@@ -251,14 +251,14 @@ Omit any heading whose section is empty.
 
 - Run code, migrations, tests, or commands described by the plan.
 - Create commits, branches, or MRs.
-- Re-evaluate whether the plan's *approach* is correct (use `plan-review` for that).
+- Re-evaluate whether the plan's *approach* is correct (use `looping-plan-review` or `plan-review` for that).
 - Add new requirements or expand the plan's scope. (Fleshing out an existing step with the detail needed to execute it is not scope expansion, and neither is adding a step the plan-steps rule requires; adding steps neither the plan nor the rule calls for is.)
 - Rewrite working code samples to be "more idiomatic" or "cleaner".
 - Annotate Category A (mid-execution) human-only steps inside the plan body — those stay in the chat summary only. Category B (post-deploy) human steps do go in the body, as a labeled checklist after `commit-mrs`.
 
 ## Relationship to other plan skills
 
-- `plan-review`: review the *substance* of the plan (premise, completeness, risks, feasibility). Run it first. It includes a verifier step, an optional walkthrough mode, and an optional implementer hand-off — all driven by user reply.
+- `looping-plan-review` / `plan-review`: review the *substance* of the plan (premise, architecture, placement, naming, completeness, risks, feasibility). Run substance review first — `/ship` uses `/looping-plan-review`. Phase 1 architecture constraints must already be encoded in Design/Changes steps (paths, names, diagrams) before clean; this skill still strips “why we decided” prose.
 - `clean-plan` (this skill): final prep pass after substance review is clean. Optimizes the plan for a simple implementer model to read and execute top-to-bottom without making decisions.
 
 ## When uncertain, ask

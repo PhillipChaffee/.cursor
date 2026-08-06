@@ -29,7 +29,7 @@ Choose by the work the agent must actually perform, not by the overall complexit
 ## Model Selection
 
 - `cursor-grok-4.5-high-fast`: default for almost all subagent work — file reading, searches, command output, mechanical lookup, research, source interpretation, debugging, reviews, verification, planning, triage, scouts, and implementation.
-- `claude-fable-5-thinking-max`: rare, bounded, thinking-only work after all evidence has already been gathered.
+- `claude-fable-5-thinking-high`: rare, bounded, thinking-only work after all evidence has already been gathered.
 
 Do not use Composer for subagents. Prefer cursor grok 4.5 high fast instead.
 

@@ -307,6 +307,21 @@ Before drafting anything, compare findings against existing MR discussions. **Do
 
 Apply the active MR comment voice user rule when available. Otherwise, use a concise, direct, professional tone. **Every comment must be written in the reviewer's voice** — the exact text gets posted as a draft note, and anything the reviewer publishes without editing goes out under their name, so each comment must be publish-ready as written.
 
+#### Never blame people
+
+Be direct about problems and history, never about people.
+
+- When explaining why code ended up a certain way, cite the **commit SHA**, ticket, or architectural motivation — not the author.
+- Do not write "`abc123` (alice) did X", "alice's refactor", or similar. The person is irrelevant to whether the change is safe now.
+- Same rule for praise-framed blame ("alice probably intended…") and for MR authors under review: critique the diff, not the person.
+
+#### Credit agent work as "AI"
+
+When disclosing that an agent did research or scanning, say **AI** — never a model
+or codename ("fable", "claude", "grok", etc.). Prefer "i had AI dig into…" / "i had AI
+scan…" / "i had AI sweep…". This overrides any voice-guide examples that still say
+"fable".
+
 ### Step 9: Post all findings as draft notes
 
 Post **every** finding as a draft note using `create_draft_note` — no selection step, no asking which to post. Draft notes are unpublished: they are visible only to their author in the GitLab UI, where the reviewer edits, deletes, and publishes the ones they want to send.
