@@ -3,7 +3,7 @@ name: Plan Code Organization
 description: >-
   Evaluate file/folder placement and symbol location proposed in a plan. Use as
   part of multi-agent plan review.
-model: cursor-grok-4.5-high-fast
+model: cursor-grok-4.6-high-fast
 readonly: true
 ---
 

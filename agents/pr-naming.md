@@ -3,7 +3,7 @@ name: Plan Naming
 description: >-
   Evaluate identifier and module naming proposed in a plan. Use as part of
   multi-agent plan review.
-model: cursor-grok-4.5-high-fast
+model: cursor-grok-4.6-high-fast
 readonly: true
 ---
 

@@ -47,7 +47,7 @@ tier. When genuinely on the fence between two tiers, pick the lower one but say 
 
 - `researcher-lite`: `composer-2.5-fast`
 - `researcher-mid`, `researcher-deep`, `research-planner`, and `research-synthesizer`:
-  `cursor-grok-4.5-high-fast`
+  `cursor-grok-4.6-high-fast`
 
 Pass the matching model explicitly on every subagent call and keep it aligned with the agent
 frontmatter.

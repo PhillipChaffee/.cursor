@@ -6,7 +6,7 @@ description: >
   services, Helm charts, Python packages, CLI tools, test suites).
   Invoke from refactor orchestration when splitting scouts from code-level smells —
   not for git-diff-only review without targets.
-model: cursor-grok-4.5-high-fast
+model: cursor-grok-4.6-high-fast
 readonly: true
 ---
 

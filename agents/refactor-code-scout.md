@@ -4,7 +4,7 @@ description: >
   Use when a multi-agent refactor planner delegates read-only, catalog-aligned scouting
   of behavioral / size / complexity smells and naming smells on specific target paths,
   with a supplied smell-catalog reference path.
-model: cursor-grok-4.5-high-fast
+model: cursor-grok-4.6-high-fast
 readonly: true
 ---
 

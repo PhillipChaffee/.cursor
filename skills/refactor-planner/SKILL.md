@@ -100,7 +100,7 @@ Spawn both readonly scouts simultaneously via the `Task` tool, in a single messa
 - `subagent_type` for the first call: `"Refactor Code Scout"` (matches the `name` field in `.cursor/agents/refactor-code-scout.md`)
 - `subagent_type` for the second call: `"Refactor Placement Scout"` (matches the `name` field in `.cursor/agents/refactor-placement-scout.md`)
 
-Run both scouts on `cursor-grok-4.5-high-fast`. Pass the model explicitly. If a named scout type is
+Run both scouts on `cursor-grok-4.6-high-fast`. Pass the model explicitly. If a named scout type is
 unavailable, use `generalPurpose` with its `.cursor/agents/` definition inlined and the same model.
 
 **Inputs to pass to `refactor-code-scout`**:

@@ -23,7 +23,7 @@ Gather the diff and changed file paths before launching subagents.
 
 Before launching reviewers, run exactly one **Code Review Planner** subagent.
 
-Use `cursor-grok-4.5-high-fast` by default. Upgrade to `claude-fable-5-thinking-high` when the
+Use `cursor-grok-4.6-high-fast` by default. Upgrade to `claude-fable-5-thinking-high` when the
 diff is clearly complex or high stakes: cross-service contracts, schema/deploy sequencing, auth
 or security boundaries, concurrency/state-machine behavior, or a large heterogeneous changeset
 with ambiguous intent. When unsure, stay on grok. The main chat applies any upgrade when
@@ -62,7 +62,7 @@ Each reviewer:
 - Has `readonly: true` (cannot modify files)
 - Returns structured findings or an exact "no issues" string
 
-Launch reviewers on `cursor-grok-4.5-high-fast` by default. Upgrade an individual reviewer to
+Launch reviewers on `cursor-grok-4.6-high-fast` by default. Upgrade an individual reviewer to
 `claude-fable-5-thinking-high` when that reviewer's domain needs deeper reasoning on this
 changeset (same complexity bar as the planner: cross-service contracts, schema/deploy sequencing,
 auth or security boundaries, concurrency/state-machine behavior, or ambiguous high-stakes
@@ -83,7 +83,7 @@ If a named reviewer is unavailable, use `generalPurpose` with the matching agent
 
 After the selected reviewers complete (but before synthesis), launch the **Code Review Verifier** as a single subagent to filter the reviewer findings. The verifier tags each finding as `confirmed`, `false_positive`, or `needs_rephrase`.
 
-Use the named **Code Review Verifier** agent on `cursor-grok-4.5-high-fast` by default. Upgrade
+Use the named **Code Review Verifier** agent on `cursor-grok-4.6-high-fast` by default. Upgrade
 to `claude-fable-5-thinking-high` when verifying a large, conflicting, or high-stakes finding set
 where false-positive filtering needs deeper judgment. When unsure, stay on grok. The main chat
 applies any upgrade when launching the subagent; this skill does not switch models itself. If the
@@ -184,7 +184,7 @@ Apply 3 approved fixes now via the implementer subagent? [yes / no / edit list]
 
 After fixes apply, suggest: "If you want to verify nothing regressed, re-invoke `/code-review` and re-run your tests."
 
-Use the named **Code Review Implementer** agent on `cursor-grok-4.5-high-fast`. If the type is unavailable,
+Use the named **Code Review Implementer** agent on `cursor-grok-4.6-high-fast`. If the type is unavailable,
 use `generalPurpose` with `cr-implementer.md` inlined and the same model.
 
 ## Review-only mode

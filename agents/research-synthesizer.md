@@ -5,7 +5,7 @@ description: >-
   summary with citations preserved. Defaults to grok; optional Fable upgrade when
   large, conflicting, or high-stakes researcher outputs need deeper judgment. Use as
   the final synthesis step of the deep-research Tier 3 pipeline.
-model: cursor-grok-4.5-high-fast
+model: cursor-grok-4.6-high-fast
 readonly: true
 ---
 

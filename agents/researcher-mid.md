@@ -6,7 +6,7 @@ description: >-
   gathering and reconciling information across several sources. Always runs on grok
   — never Fable; if thinking-only Fable reasoning is needed, use researcher-deep
   instead. Reads the codebase, the web, and MCP tools; never edits files.
-model: cursor-grok-4.5-high-fast
+model: cursor-grok-4.6-high-fast
 readonly: false
 ---
 

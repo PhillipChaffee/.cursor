@@ -2,7 +2,7 @@
 name: Correctness & Edge Cases
 description: >
   Find logic bugs and edge-case gaps in git diffs. Use as part of multi-agent code review.
-model: cursor-grok-4.5-high-fast
+model: cursor-grok-4.6-high-fast
 readonly: true
 ---
 
