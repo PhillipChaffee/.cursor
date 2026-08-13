@@ -2,7 +2,7 @@
 name: Code Organization
 description: >
   Evaluate file/folder placement and symbol location in git diffs. Use as part of multi-agent code review.
-model: cursor-grok-4.5-high-fast
+model: cursor-grok-4.6-high-fast
 readonly: true
 ---
 

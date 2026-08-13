@@ -17,27 +17,27 @@ Delegate unfamiliar code or architecture, multi-file tracing, debugging and root
 
 Choose by the work the agent must actually perform, not by the overall complexity of the parent task.
 
-- `researcher-lite`: mechanical retrieval from known sources, one-fact confirmation, or a small bounded read. Use cursor grok 4.5 high fast.
-- `explore`: read-only repository search, file discovery, symbol tracing, and bounded codebase sweeps. Use cursor grok 4.5 high fast.
-- `shell`: command-only collection such as git state, test output, build output, or environment facts. Use cursor grok 4.5 high fast.
-- `researcher-mid`: normal multi-file or multi-source gathering, call-flow tracing, evidence comparison, and research summaries. Use cursor grok 4.5 high fast.
-- `researcher-deep`: broad, ambiguous, high-stakes, security-sensitive, or novel evidence gathering. Use cursor grok 4.5 high fast. The `deep` label does not itself justify Fable.
-- Named specialists: use when their rubric matches the task. Default review, triage, scout, verifier, and implementation agents to cursor grok 4.5 high fast, especially when they must inspect source material.
+- `researcher-lite`: mechanical retrieval from known sources, one-fact confirmation, or a small bounded read. Use cursor grok 4.6 high fast.
+- `explore`: read-only repository search, file discovery, symbol tracing, and bounded codebase sweeps. Use cursor grok 4.6 high fast.
+- `shell`: command-only collection such as git state, test output, build output, or environment facts. Use cursor grok 4.6 high fast.
+- `researcher-mid`: normal multi-file or multi-source gathering, call-flow tracing, evidence comparison, and research summaries. Use cursor grok 4.6 high fast.
+- `researcher-deep`: broad, ambiguous, high-stakes, security-sensitive, or novel evidence gathering. Use cursor grok 4.6 high fast. The `deep` label does not itself justify Fable.
+- Named specialists: use when their rubric matches the task. Default review, triage, scout, verifier, and implementation agents to cursor grok 4.6 high fast, especially when they must inspect source material.
 - `generalPurpose`: use only as a carrier when a required named type is unavailable. Inline the highest-priority agent definition in its prompt.
 - `deep-research`: use only when the task truly needs planning, multiple collectors, and final synthesis.
 
 ## Model Selection
 
-- `cursor-grok-4.5-high-fast`: default for almost all subagent work — file reading, searches, command output, mechanical lookup, research, source interpretation, debugging, reviews, verification, planning, triage, scouts, and implementation.
+- `cursor-grok-4.6-high-fast`: default for almost all subagent work — file reading, searches, command output, mechanical lookup, research, source interpretation, debugging, reviews, verification, planning, triage, scouts, and implementation.
 - `claude-fable-5-thinking-high`: rare, bounded, thinking-only work after all evidence has already been gathered.
 
-Do not use Composer for subagents. Prefer cursor grok 4.5 high fast instead.
+Do not use Composer for subagents. Prefer cursor grok 4.6 high fast instead.
 
 Choose the lowest tier that can do the work reliably. Complexity alone does not justify Fable. Fable is justified only when the remaining task is a difficult reasoning problem such as selecting among architectural options, synthesizing conflicting specialist findings, performing a strategic premortem, or decomposing a high-stakes plan.
 
 ## Fable Must Be Thinking-Only
 
-Before dispatching Fable, ask: "Can this prompt be fully self-contained without asking the agent to inspect, fetch, search, or run anything?" If no, gather the missing information with cursor grok 4.5 high fast first.
+Before dispatching Fable, ask: "Can this prompt be fully self-contained without asking the agent to inspect, fetch, search, or run anything?" If no, gather the missing information with cursor grok 4.6 high fast first.
 
 Never use Fable to:
 
@@ -48,7 +48,7 @@ Never use Fable to:
 
 Use a two-stage pipeline for complex work:
 
-1. Collector agents using cursor grok 4.5 high fast gather facts, relevant excerpts, source references, constraints, competing findings, and unresolved questions.
+1. Collector agents using cursor grok 4.6 high fast gather facts, relevant excerpts, source references, constraints, competing findings, and unresolved questions.
 2. A Fable reasoning agent receives one compact evidence packet and performs only the named decision, synthesis, critique, or planning task.
 
 The Fable prompt must:
@@ -62,7 +62,7 @@ If Fable reports an evidence gap, send that exact gap to a grok collector, then 
 
 ## Review and Planning Defaults
 
-Code and plan review agents stay on cursor grok 4.5 high fast when they need to inspect the diff, plan, or codebase. A Fable planner or synthesizer may be added only after cursor grok 4.5 high fast agents provide the necessary evidence. Preserve the reason for escalation in its prompt.
+Code and plan review agents stay on cursor grok 4.6 high fast when they need to inspect the diff, plan, or codebase. A Fable planner or synthesizer may be added only after cursor grok 4.6 high fast agents provide the necessary evidence. Preserve the reason for escalation in its prompt.
 
 Specialized single-shot skills such as Bugbot and Security Review keep their prescribed invocation. Do not override a workflow's required model or roster unless the workflow explicitly permits it.
 

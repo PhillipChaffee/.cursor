@@ -7,7 +7,7 @@ description: >-
   architecture and tradeoff analysis, security/performance reasoning, ambiguous or
   novel questions, and synthesis across many or conflicting sources. Reads the
   codebase, the web, and MCP tools on grok; never edits files.
-model: cursor-grok-4.5-high-fast
+model: cursor-grok-4.6-high-fast
 readonly: false
 ---
 

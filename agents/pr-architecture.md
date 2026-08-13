@@ -1,7 +1,7 @@
 ---
 name: Plan Architecture & Design
 description: Use as part of multi-agent plan review. Evaluates structure, boundaries, coupling, and placement of responsibilities proposed in the plan.
-model: cursor-grok-4.5-high-fast
+model: cursor-grok-4.6-high-fast
 readonly: true
 ---
 

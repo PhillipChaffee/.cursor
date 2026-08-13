@@ -54,7 +54,7 @@ User-declared out-of-scope stays out, unless the PR’s own behavior is independ
 
 Before implementing any comment, Bugbot, or CI fix (pure intent-preserving conflict resolution may proceed without triage, but still counts against the budget if the diff grows):
 
-1. Launch **one** `generalPurpose` triage subagent on `cursor-grok-4.5-high-fast`.
+1. Launch **one** `generalPurpose` triage subagent on `cursor-grok-4.6-high-fast`.
 2. Pass: current PR diff paths, candidate items, this scope contract, baseline / current size / remaining budget, and pointers to active rules for style / good-opinion judgment.
 3. For each item, exactly one decision:
 

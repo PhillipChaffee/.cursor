@@ -99,7 +99,7 @@ Anti-stall rule: if two consecutive iterations produce the same confirmed blocke
 
 ### Step 3: Triage — decide the smallest safe fixes
 
-Launch a **single `generalPurpose` triage subagent** on `cursor-grok-4.5-high-fast` with:
+Launch a **single `generalPurpose` triage subagent** on `cursor-grok-4.6-high-fast` with:
 
 - The current diff and changed file paths.
 - The full verifier-filtered summary from Step 1 (confirmed findings, rephrased findings, rejected findings with reasons).

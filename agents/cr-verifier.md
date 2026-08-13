@@ -7,7 +7,7 @@ description: >-
   of context). Optional Fable upgrade when verifying a large, conflicting, or
   high-stakes finding set — Fable is thinking-only on the supplied diff and finding
   packet, with no further source lookup.
-model: cursor-grok-4.5-high-fast
+model: cursor-grok-4.6-high-fast
 readonly: true
 ---
 

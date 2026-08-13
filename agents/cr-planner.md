@@ -1,7 +1,7 @@
 ---
 name: Code Review Planner
 description: Use as the mandatory first step of multi-agent code review. Selects reviewers, focus briefs, and optional Fable upgrade candidates before findings are gathered.
-model: cursor-grok-4.5-high-fast
+model: cursor-grok-4.6-high-fast
 readonly: true
 ---
 
@@ -24,7 +24,7 @@ Return:
 2. **Review scope**: the behavior, files, and cross-system interactions under review.
 3. **Selected reviewers**: the full roster or a focused subset, with a reason for every inclusion
    and omission.
-4. **Reviewer models**: assign every selected reviewer `cursor-grok-4.5-high-fast`. Optionally
+4. **Reviewer models**: assign every selected reviewer `cursor-grok-4.6-high-fast`. Optionally
    list Fable upgrade candidates (reviewer + reason) for the main chat to apply when launching
    subagents — do not treat those as launches you perform yourself.
 5. **Focus briefs**: exact risks and questions each selected reviewer should investigate.

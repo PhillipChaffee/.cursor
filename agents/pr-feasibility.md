@@ -1,7 +1,7 @@
 ---
 name: Technical Feasibility Reviewer
 description: Use as part of multi-agent plan review. Verifies technical assumptions against the codebase and surfaces feasibility concerns, alternatives, and hidden work.
-model: cursor-grok-4.5-high-fast
+model: cursor-grok-4.6-high-fast
 readonly: true
 ---
 

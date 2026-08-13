@@ -39,7 +39,7 @@ when something is actually wrong, not when a section header is absent.
 
 Before launching reviewers, run exactly one **Plan Review Planner** subagent.
 
-Use `cursor-grok-4.5-high-fast` by default. Upgrade to `claude-fable-5-thinking-high` when
+Use `cursor-grok-4.6-high-fast` by default. Upgrade to `claude-fable-5-thinking-high` when
 the plan is clearly complex or high stakes: cross-service contracts, irreversible schema/deploy
 sequencing, auth or security boundaries, or a strategic rethink where premises are ambiguous.
 When unsure, stay on grok. The main chat applies any upgrade when launching the subagent; this
@@ -88,7 +88,7 @@ Each reviewer:
 - Returns structured findings or a clean verdict
 - The Feasibility agent may read codebase files to verify plan assumptions
 
-Launch reviewers on `cursor-grok-4.5-high-fast` by default. Upgrade an individual reviewer to
+Launch reviewers on `cursor-grok-4.6-high-fast` by default. Upgrade an individual reviewer to
 `claude-fable-5-thinking-high` when that reviewer's domain needs deeper reasoning on this plan,
 or when the planner listed that reviewer as a Fable upgrade candidate with a reason. A review
 domain alone does not justify Fable. When unsure, stay on grok. The main chat applies any upgrade
@@ -142,7 +142,7 @@ After the selected reviewers complete (but before synthesis), launch the **Plan 
 as a single subagent to filter the reviewer findings. The verifier tags each finding as
 `confirmed`, `false_positive`, or `needs_rephrase`. Deduplicate near-duplicate findings in the parent chat **before** launching the verifier (merge same root cause; keep source tags). The verifier filters and rephrases; it does not own cross-reviewer deduplication.
 
-Use the named **Plan Review Verifier** agent on `cursor-grok-4.5-high-fast` by default. Upgrade
+Use the named **Plan Review Verifier** agent on `cursor-grok-4.6-high-fast` by default. Upgrade
 to `claude-fable-5-thinking-high` when verifying a large, conflicting, or high-stakes finding
 set where false-positive filtering needs deeper judgment. When unsure, stay on grok. The main
 chat applies any upgrade when launching the subagent; this skill does not switch models itself.
@@ -251,7 +251,7 @@ Apply 3 approved fixes now via the implementer subagent? [yes / no / edit list]
 
 After fixes apply, suggest: "If you want to verify nothing regressed, re-invoke `/plan-review`."
 
-Use the named **Plan Review Implementer** agent on `cursor-grok-4.5-high-fast`. If the type is
+Use the named **Plan Review Implementer** agent on `cursor-grok-4.6-high-fast`. If the type is
 unavailable, use `generalPurpose` with `pr-implementer.md` inlined and the same model.
 
 ## Review-only mode

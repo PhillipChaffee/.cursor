@@ -6,7 +6,7 @@ description: >-
   collectors provide a complete evidence packet. Assigns parallelizable research
   subtasks, difficulty tiers, sources, and expected outputs without reading or fetching
   anything itself.
-model: cursor-grok-4.5-high-fast
+model: cursor-grok-4.6-high-fast
 readonly: true
 ---
 
@@ -38,10 +38,10 @@ The orchestrator's prompt gives you:
 - **The researcher roster** - three tiers the orchestrator can spawn:
   - `researcher-lite` (composer 2.5) - simple, high-volume reads: code lookups,
     locating definitions / call sites, extracting config values, quick facts.
-  - `researcher-mid` (cursor grok 4.5 high fast) - moderate reasoning: tracing data flows,
+  - `researcher-mid` (cursor grok 4.6 high fast) - moderate reasoning: tracing data flows,
     summarizing how a subsystem works, gathering across several sources. Never assign
     Fable to mid — if thinking-only Fable reasoning is needed, use `researcher-deep`.
-  - `researcher-deep` (cursor grok 4.5 high fast) - heavy reasoning / high knowledge:
+  - `researcher-deep` (cursor grok 4.6 high fast) - heavy reasoning / high knowledge:
     architecture and tradeoff analysis, security / performance reasoning, novel
     questions, synthesis across many conflicting sources. Defaults to grok. A Fable
     upgrade is appropriate when deeper thinking-only reasoning is needed and that

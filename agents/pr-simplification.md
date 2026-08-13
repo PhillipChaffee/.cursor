@@ -1,7 +1,7 @@
 ---
 name: Plan Simplification & Maintainability
 description: Use as part of multi-agent plan review. Evaluates whether the plan's proposed work is the simplest path that meets the goal — flags premature abstraction, over-engineering, and reuse misses.
-model: cursor-grok-4.5-high-fast
+model: cursor-grok-4.6-high-fast
 readonly: true
 ---
 

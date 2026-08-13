@@ -3,7 +3,7 @@ name: Plan Review Planner
 description: >-
   Use as the mandatory first step of multi-agent plan review. Selects reviewers,
   focus briefs, and optional Fable upgrade candidates before findings are gathered.
-model: cursor-grok-4.5-high-fast
+model: cursor-grok-4.6-high-fast
 readonly: true
 ---
 
@@ -47,7 +47,7 @@ Return:
 2. **Review scope**: the behavior, services, and design decisions under review.
 3. **Selected reviewers**: the full roster or a focused subset, with a reason for every inclusion
    and omission.
-4. **Reviewer models**: assign every selected reviewer `cursor-grok-4.5-high-fast`. Optionally
+4. **Reviewer models**: assign every selected reviewer `cursor-grok-4.6-high-fast`. Optionally
    list Fable upgrade candidates (reviewer + reason) for the main chat to apply when launching
    subagents — use `claude-fable-5-thinking-high` as the candidate slug. Do not treat those as
    launches you perform yourself.

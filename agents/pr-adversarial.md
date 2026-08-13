@@ -1,7 +1,7 @@
 ---
 name: Adversarial Reviewer
 description: Use as part of multi-agent plan review. Challenges premises, hidden assumptions, and approach selection. Runs a strategic pre-mortem and steelmans alternatives.
-model: cursor-grok-4.5-high-fast
+model: cursor-grok-4.6-high-fast
 readonly: true
 ---
 
