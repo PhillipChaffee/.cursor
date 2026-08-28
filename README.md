@@ -1,9 +1,9 @@
 # .cursor
 
 A personal collection of Cursor skills, subagents, and rules for research, code
-review, plan review, MR review, refactor planning, ticket shipping, and
-merge/CI hygiene. Python/Django + GitLab-flavored, but the review and planning
-workflows are generic.
+review, plan review, MR review, refactor planning, ticket shipping, exhaustive
+multi-agent orchestration, and merge/CI hygiene. Python/Django + GitLab-flavored,
+but the review and planning workflows are generic.
 
 This repository's Git worktree **is** `~/.cursor`. Skills, agents, and rules
 here are the live global Cursor configuration — no copy/symlink install step is
@@ -110,6 +110,8 @@ personal use across projects.
 - `pre-mr-checklist` — pre-merge checklist (inline imports, type annotations,
   logging, test coverage, secrets, feature-flag checks, etc.)
 - `ci-lint-test` — run a project's CI lint/test steps locally before pushing
+- `ultracode` — standing exhaustive orchestration for one substantive request
+  (slash-only; nests the specialist skills above rather than replacing them)
 
 ### `agents/`
 
@@ -194,7 +196,8 @@ often run the steps myself:
 
 Side paths: `mr-review` for reviewing someone else's GitLab MR; `code-review`
 when I want a multi-reviewer pass on a diff without the loop; `refactor-planner`
-before a behavior-preserving refactor.
+before a behavior-preserving refactor; `ultracode` when I want standing
+exhaustive orchestration around those other skills.
 
 ### Most used skills
 
